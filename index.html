@@ -1494,12 +1494,13 @@
         #rewardTab .status-msg{min-height:24px;padding:5px 9px;border-radius:12px;background:rgba(255,255,255,.78);max-width:520px;margin:7px auto 10px;box-sizing:border-box}
 
         /* Leaderboards: keep the original ranking/table layout, with a clean 5-row scroll area */
-        #rewardTab table,#compTab table{width:100%;border-collapse:collapse;table-layout:fixed}
-        #rewardTab table thead,#compTab table thead{display:block;width:100%}
-        #rewardTab table thead tr,#compTab table thead tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
-        #rewardTab table tbody,#compTab table tbody{display:block;width:100%;max-height:225px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
-        #rewardTab table tbody tr,#compTab table tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
-        #rewardTab table th,#rewardTab table td,#compTab table th,#compTab table td{box-sizing:border-box;min-width:0}
+        /* Tasbeeh leaderboard: show 5 rows with smooth vertical scroll; competition leaderboard stays unchanged */
+        #rewardTab table{width:100%;border-collapse:collapse;table-layout:fixed}
+        #rewardTab table thead{display:block;width:100%}
+        #rewardTab table thead tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+        #rewardTab table tbody{display:block;width:100%;max-height:225px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+        #rewardTab table tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+        #rewardTab table th,#rewardTab table td{box-sizing:border-box;min-width:0}
 
         @media(max-width:480px){
           #rewardTab{padding-left:0;padding-right:0}
@@ -1513,7 +1514,7 @@
           #rewardTab .tasbeeh-live-stats .mic-btn{width:119px;height:119px}
           #rewardTab .tasbeeh-live-stats .mic-btn #userTotal{font-size:29px!important}
           #rewardTab .tasbeeh-live-stats .mic-btn span[style*="font-size: 12px"]{font-size:11px!important}
-          #rewardTab table tbody,#compTab table tbody{max-height:220px}
+          #rewardTab table tbody{max-height:220px}
         }
 
         @media(max-width:360px){
