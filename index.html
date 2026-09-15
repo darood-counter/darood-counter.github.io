@@ -2356,50 +2356,47 @@ function switchBottomTab(tabName) {
 
     // ===== TASBEEH LIVE TOTAL / TODAY / RANK =====
     let tasbeehTodayListener = null;
-    let tasbeehTodayListenerUid = null;
-    let tasbeehTodayListenerDate = null;
+    let tasbeehTodayUid = null;
+    let tasbeehTodayBoundDate = null;
+    let tasbeehTodayRolloverTimer = null;
 
-    function attachTasbeehTodayStats(uid, force = false) {
-      if (!uid || !db) return;
-      const dateKey = getLocalDateKey();
-      if (!force && tasbeehTodayListener && tasbeehTodayListenerUid === uid && tasbeehTodayListenerDate === dateKey) return;
-
-      if (tasbeehTodayListener) {
-        try { tasbeehTodayListener.off(); } catch(e) {}
-        tasbeehTodayListener = null;
-      }
-
-      tasbeehTodayListenerUid = uid;
-      tasbeehTodayListenerDate = dateKey;
-      const todayRef = db.ref("users/" + uid + "/dailyCounts/" + dateKey);
-      tasbeehTodayListener = todayRef;
-
-      const setTodayDisplay = value => {
-        const todayCount = Number(value || 0);
-        const todayEl = document.getElementById("userTotal");
-        const smallTodayEl = document.getElementById("tasbeehTodaySmall");
-        if (todayEl) todayEl.innerText = todayCount;
-        if (smallTodayEl) smallTodayEl.innerText = todayCount;
-      };
-      setTodayDisplay(0);
-      todayRef.on("value", snapshot => setTodayDisplay(snapshot.val()));
+    function setTasbeehTodayCount(value) {
+      const count = Number(value || 0);
+      const todayEl = document.getElementById("userTotal");
+      if (todayEl) todayEl.innerText = count;
+      const smallTodayEl = document.getElementById("tasbeehTodaySmall");
+      if (smallTodayEl) smallTodayEl.innerText = count;
     }
 
-    // At midnight, switch automatically to today's Firebase date node.
-    let tasbeehDateWatcherKey = getLocalDateKey();
-    setInterval(() => {
-      const newDateKey = getLocalDateKey();
-      if (newDateKey !== tasbeehDateWatcherKey) {
-        tasbeehDateWatcherKey = newDateKey;
-        if (currentUser) attachTasbeehTodayStats(currentUser.uid, true);
-        else {
-          const todayEl = document.getElementById("userTotal");
-          const smallTodayEl = document.getElementById("tasbeehTodaySmall");
-          if (todayEl) todayEl.innerText = 0;
-          if (smallTodayEl) smallTodayEl.innerText = 0;
-        }
-      }
-    }, 30000);
+    function bindTasbeehTodayCount(uid) {
+      if (!uid || !db) return;
+      const dateKey = getLocalDateKey();
+      if (tasbeehTodayListener) { try { tasbeehTodayListener.off(); } catch(e) {} }
+      tasbeehTodayUid = uid;
+      tasbeehTodayBoundDate = dateKey;
+      setTasbeehTodayCount(0);
+      const todayRef = db.ref("users/" + uid + "/dailyCounts/" + dateKey);
+      tasbeehTodayListener = todayRef;
+      todayRef.on("value", snapshot => {
+        if (tasbeehTodayBoundDate !== getLocalDateKey()) return;
+        setTasbeehTodayCount(snapshot.val());
+      });
+      scheduleTasbeehTodayRollover();
+    }
+
+    function scheduleTasbeehTodayRollover() {
+      if (tasbeehTodayRolloverTimer) clearTimeout(tasbeehTodayRolloverTimer);
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      tasbeehTodayRolloverTimer = setTimeout(() => {
+        const newDateKey = getLocalDateKey();
+        if (tasbeehTodayUid && newDateKey !== tasbeehTodayBoundDate) bindTasbeehTodayCount(tasbeehTodayUid);
+        else scheduleTasbeehTodayRollover();
+      }, Math.max(1000, midnight.getTime() - now.getTime() + 500));
+    }
+
+    function attachTasbeehTodayStats(uid) { bindTasbeehTodayCount(uid); }
 
     function updateTasbeehRankAndTotal(snapshot) {
       const userList = [];
@@ -2464,7 +2461,7 @@ function switchBottomTab(tabName) {
           const lifetime = data ? Number(data.count || 0) : 0;
           const lifetimeEl = document.getElementById("tasbeehLifetimeTotal");
           if (lifetimeEl) lifetimeEl.innerText = lifetime;
-          attachTasbeehTodayStats(user.uid);
+          if (tasbeehTodayUid !== user.uid || tasbeehTodayBoundDate !== getLocalDateKey()) bindTasbeehTodayCount(user.uid);
           if (data) {
             if(data.accName) document.getElementById("accName").value = data.accName;
             if(data.accNumber) document.getElementById("accNumber").value = data.accNumber;
@@ -3771,11 +3768,8 @@ function switchBottomTab(tabName) {
           const newCount = totalResult && totalResult.snapshot ? Number(totalResult.snapshot.val() || 0) : null;
           const newToday = todayResult && todayResult.snapshot ? Number(todayResult.snapshot.val() || 0) : null;
           const lifetimeEl = document.getElementById('tasbeehLifetimeTotal');
-          const todayEl = document.getElementById('userTotal');
           if (lifetimeEl && newCount !== null) lifetimeEl.innerText = newCount;
-          if (todayEl && newToday !== null) todayEl.innerText = newToday;
-              const smallTodayEl = document.getElementById("tasbeehTodaySmall");
-              if (smallTodayEl && newToday !== null) smallTodayEl.innerText = newToday;
+          if (newToday !== null) setTasbeehTodayCount(newToday);
           if (status) {
             status.style.color = '#15803d';
             status.innerText = '✓ درود شریف شمار ہو گیا!';
@@ -4044,11 +4038,8 @@ function switchBottomTab(tabName) {
               const newToday = todayResult && todayResult.snapshot ? Number(todayResult.snapshot.val() || 0) : null;
 
               const lifetimeEl = document.getElementById("tasbeehLifetimeTotal");
-              const todayEl = document.getElementById("userTotal");
               if (lifetimeEl && newTotal !== null) lifetimeEl.innerText = newTotal;
-              if (todayEl && newToday !== null) todayEl.innerText = newToday;
-              const smallTodayEl = document.getElementById("tasbeehTodaySmall");
-              if (smallTodayEl && newToday !== null) smallTodayEl.innerText = newToday;
+              if (newToday !== null) setTasbeehTodayCount(newToday);
 
               console.log("Tasbeeh total/today saved:", newTotal, newToday);
             }).catch(err => {
