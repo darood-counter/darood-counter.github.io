@@ -2211,7 +2211,7 @@ function switchBottomTab(tabName) {
            setTimeout(() => {
              if (document.getElementById('rewardTab') && !document.getElementById('rewardTab').classList.contains('hidden')) {
                startVoiceRecognition('countBtn', 'statusMsg', false);
-               showTasbeehVoiceStartNotice();
+               if (tasbeehListeningActive) showTasbeehVoiceStartNotice();
              }
            }, 120);
          }
@@ -3630,7 +3630,7 @@ function switchBottomTab(tabName) {
           triggerVibration();
           hideTasbeehSilentUI();
           // After every successful silent count, automatically start the next
-          // silent 20-second round so the process continues continuously.
+          // silent 15-second round so the process continues continuously.
           setTimeout(() => {
             if (document.hidden) return;
             const rewardTab = document.getElementById('rewardTab');
@@ -3650,10 +3650,10 @@ function switchBottomTab(tabName) {
     function startTasbeehVoiceFromUser() {
       hideTasbeehSilentUI();
       resetDaroodWordHighlight();
-      // Start voice first; then show the 5-second instruction popup.
-      // This prevents a recognition-start failure from immediately hiding the popup.
+      // Start listening first. If the browser refuses microphone recognition,
+      // the page still remains open and the popup is not shown falsely.
       startVoiceRecognition('countBtn', 'statusMsg', false);
-      showTasbeehVoiceStartNotice();
+      if (tasbeehListeningActive) showTasbeehVoiceStartNotice();
     }
 
     function stopTasbeehListening() {
@@ -4060,7 +4060,21 @@ function switchBottomTab(tabName) {
       try {
         recognition.start();
       } catch (e) {
-        finishListening();
+        if (!isComp) {
+          tasbeehListeningActive = false;
+          activeTasbeehRecognition = null;
+          const voiceIcon = document.getElementById('tasbeehVoiceControlIcon');
+          if (voiceIcon) voiceIcon.innerText = '▶️ شروع';
+          const countBtnEl = document.getElementById('countBtn');
+          if (countBtnEl) countBtnEl.classList.remove('listening');
+          if (statusEl) {
+            statusEl.style.color = '#ef4444';
+            statusEl.innerText = 'مائیک شروع نہیں ہو سکا۔ دوبارہ Start دبائیں۔';
+          }
+          releaseScreenWakeLock();
+        } else {
+          finishListening();
+        }
       }
     }
 
