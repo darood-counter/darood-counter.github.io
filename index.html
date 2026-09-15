@@ -1297,43 +1297,45 @@
       <style>
         .tasbeeh-live-stats{
           display:grid;
-          grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+          grid-template-columns:1fr 1.25fr 1fr;
+          grid-template-areas:"rank center stats";
           align-items:center;
-          justify-content:center;
-          gap:10px;
-          width:min(100%,520px);
-          margin:4px auto 8px;
+          gap:12px;
+          max-width:520px;
+          margin:8px auto 14px;
+          padding:14px 12px;
+          border:1px solid rgba(180,140,45,.25);
+          border-radius:28px;
+          background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(255,250,232,.92));
+          box-shadow:0 10px 28px rgba(80,55,15,.10), inset 0 1px 0 rgba(255,255,255,.8);
         }
         .tasbeeh-stat-card{
           min-width:0;
-          padding:10px 6px;
-          border:1px solid #ead9b0;
-          border-radius:14px;
-          background:#fffdf9;
-          box-shadow:0 4px 12px rgba(0,0,0,.06);
+          padding:12px 7px;
+          border-radius:18px;
+          background:rgba(255,255,255,.72);
+          border:1px solid rgba(180,140,45,.20);
+          box-shadow:0 5px 14px rgba(80,55,15,.06);
+          text-align:center;
         }
-        .tasbeeh-stat-label{
-          font-size:11px;
-          color:var(--text-muted);
-          font-weight:700;
-          white-space:nowrap;
+        .tasbeeh-stat-card:first-child{grid-area:stats}
+        .tasbeeh-stat-card:last-child{grid-area:rank}
+        .tasbeeh-stat-label{font-size:12px;color:var(--text-muted);font-weight:700;margin-bottom:4px}
+        .tasbeeh-stat-value{font-size:25px;line-height:1.05;color:var(--primary-color);font-weight:900}
+        .tasbeeh-stat-card:first-child .tasbeeh-stat-label:before{content:'✨ ';}
+        .tasbeeh-stat-card:last-child .tasbeeh-stat-label:before{content:'🏆 ';}
+        .tasbeeh-live-stats .mic-circle-wrapper{grid-area:center;margin:0 auto;filter:drop-shadow(0 8px 14px rgba(80,55,15,.12))}
+        .tasbeeh-live-stats .mic-btn{border-width:3px}
+        .tasbeeh-today-under-total{grid-area:stats;margin-top:7px;font-size:11px;color:var(--text-muted);font-weight:700}
+        .tasbeeh-stat-stack{grid-area:stats;display:flex;flex-direction:column;gap:0}
+        .tasbeeh-stat-stack .tasbeeh-stat-card{width:100%}
+        @media(max-width:430px){
+          .tasbeeh-live-stats{grid-template-columns:1fr 1.15fr 1fr;gap:7px;padding:10px 7px;border-radius:23px}
+          .tasbeeh-stat-card{padding:10px 4px;border-radius:15px}
+          .tasbeeh-stat-label{font-size:10px}.tasbeeh-stat-value{font-size:21px}
+          .tasbeeh-live-stats .mic-circle-wrapper{transform:scale(.88)}
         }
-        .tasbeeh-stat-value{
-          margin-top:3px;
-          font-size:23px;
-          line-height:1.1;
-          color:var(--primary-color);
-          font-weight:800;
-        }
-        .tasbeeh-live-stats .mic-circle-wrapper{
-          margin:0;
-        }
-        @media (max-width:380px){
-          .tasbeeh-live-stats{gap:5px}
-          .tasbeeh-stat-card{padding:8px 4px}
-          .tasbeeh-stat-label{font-size:10px}
-          .tasbeeh-stat-value{font-size:20px}
-        }
+        @media(max-width:360px){.tasbeeh-live-stats{gap:4px;padding:8px 4px}.tasbeeh-stat-value{font-size:19px}.tasbeeh-stat-label{font-size:9px}}
       </style>
 
       <!-- TAB 3: Tasbeeh Tab -->
@@ -1343,9 +1345,12 @@
         <div id="rewardDaroodSlot"></div>
 
         <div class="tasbeeh-live-stats" id="tasbeehLiveStats">
-          <div class="tasbeeh-stat-card">
-            <div class="tasbeeh-stat-label">📿 کل درود</div>
-            <div class="tasbeeh-stat-value" id="tasbeehLifetimeTotal">0</div>
+          <div class="tasbeeh-stat-stack">
+            <div class="tasbeeh-stat-card">
+              <div class="tasbeeh-stat-label">کل درود</div>
+              <div class="tasbeeh-stat-value" id="tasbeehLifetimeTotal">0</div>
+            </div>
+            <div class="tasbeeh-today-under-total">آج کے درود: <b id="tasbeehTodaySmall">0</b></div>
           </div>
 
           <div class="mic-circle-wrapper">
@@ -1358,8 +1363,9 @@
           </div>
 
           <div class="tasbeeh-stat-card">
-            <div class="tasbeeh-stat-label">🏆 رینکنگ</div>
+            <div class="tasbeeh-stat-label">رینکنگ</div>
             <div class="tasbeeh-stat-value" id="tasbeehCurrentRank">-</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:4px;font-weight:700">آپ کی پوزیشن</div>
           </div>
         </div>
         <div id="statusMsg" class="status-msg" style="color: var(--primary-color);"></div>
@@ -2350,23 +2356,50 @@ function switchBottomTab(tabName) {
 
     // ===== TASBEEH LIVE TOTAL / TODAY / RANK =====
     let tasbeehTodayListener = null;
+    let tasbeehTodayListenerUid = null;
+    let tasbeehTodayListenerDate = null;
 
-    function attachTasbeehTodayStats(uid) {
+    function attachTasbeehTodayStats(uid, force = false) {
       if (!uid || !db) return;
+      const dateKey = getLocalDateKey();
+      if (!force && tasbeehTodayListener && tasbeehTodayListenerUid === uid && tasbeehTodayListenerDate === dateKey) return;
+
       if (tasbeehTodayListener) {
         try { tasbeehTodayListener.off(); } catch(e) {}
         tasbeehTodayListener = null;
       }
 
-      const dateKey = getLocalDateKey();
+      tasbeehTodayListenerUid = uid;
+      tasbeehTodayListenerDate = dateKey;
       const todayRef = db.ref("users/" + uid + "/dailyCounts/" + dateKey);
       tasbeehTodayListener = todayRef;
-      todayRef.on("value", snapshot => {
-        const todayCount = Number(snapshot.val() || 0);
+
+      const setTodayDisplay = value => {
+        const todayCount = Number(value || 0);
         const todayEl = document.getElementById("userTotal");
+        const smallTodayEl = document.getElementById("tasbeehTodaySmall");
         if (todayEl) todayEl.innerText = todayCount;
-      });
+        if (smallTodayEl) smallTodayEl.innerText = todayCount;
+      };
+      setTodayDisplay(0);
+      todayRef.on("value", snapshot => setTodayDisplay(snapshot.val()));
     }
+
+    // At midnight, switch automatically to today's Firebase date node.
+    let tasbeehDateWatcherKey = getLocalDateKey();
+    setInterval(() => {
+      const newDateKey = getLocalDateKey();
+      if (newDateKey !== tasbeehDateWatcherKey) {
+        tasbeehDateWatcherKey = newDateKey;
+        if (currentUser) attachTasbeehTodayStats(currentUser.uid, true);
+        else {
+          const todayEl = document.getElementById("userTotal");
+          const smallTodayEl = document.getElementById("tasbeehTodaySmall");
+          if (todayEl) todayEl.innerText = 0;
+          if (smallTodayEl) smallTodayEl.innerText = 0;
+        }
+      }
+    }, 30000);
 
     function updateTasbeehRankAndTotal(snapshot) {
       const userList = [];
@@ -3741,6 +3774,8 @@ function switchBottomTab(tabName) {
           const todayEl = document.getElementById('userTotal');
           if (lifetimeEl && newCount !== null) lifetimeEl.innerText = newCount;
           if (todayEl && newToday !== null) todayEl.innerText = newToday;
+              const smallTodayEl = document.getElementById("tasbeehTodaySmall");
+              if (smallTodayEl && newToday !== null) smallTodayEl.innerText = newToday;
           if (status) {
             status.style.color = '#15803d';
             status.innerText = '✓ درود شریف شمار ہو گیا!';
@@ -4012,6 +4047,8 @@ function switchBottomTab(tabName) {
               const todayEl = document.getElementById("userTotal");
               if (lifetimeEl && newTotal !== null) lifetimeEl.innerText = newTotal;
               if (todayEl && newToday !== null) todayEl.innerText = newToday;
+              const smallTodayEl = document.getElementById("tasbeehTodaySmall");
+              if (smallTodayEl && newToday !== null) smallTodayEl.innerText = newToday;
 
               console.log("Tasbeeh total/today saved:", newTotal, newToday);
             }).catch(err => {
