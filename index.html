@@ -810,6 +810,24 @@
     @keyframes prayerPopupIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 
 
+    /* ===== TASBEEH VOICE INTRO POPUP ===== */
+    #tasbeehVoiceIntroNotice{
+      position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100003;
+      width:min(390px,calc(100% - 28px));box-sizing:border-box;
+      background:#fff;border:2px solid var(--accent-gold);border-radius:18px;
+      padding:14px 16px;box-shadow:0 12px 35px rgba(0,0,0,.22);text-align:center;
+      animation:tasbeehNoticeIn .22s ease;
+    }
+    #tasbeehVoiceIntroNotice .voice-intro-title{
+      font-size:18px;font-weight:900;color:var(--primary-color);line-height:1.55;
+    }
+    #tasbeehVoiceIntroNotice .voice-intro-sub{
+      font-size:13px;color:var(--text-muted);line-height:1.75;margin-top:4px;
+    }
+    #tasbeehVoiceIntroNotice .voice-intro-count{
+      font-size:11px;color:#a16207;font-weight:800;margin-top:5px;
+    }
+
     /* ===== TASBEEH SILENT READING MODE ===== */
     #tasbeehSilentNotice{
       position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100001;
@@ -878,6 +896,12 @@
     <div class="silent-title">🤲 دل میں درود شریف پڑھنا شروع کریں</div>
     <div class="silent-count" id="tasbeehSilentIntroCount">3 سیکنڈ</div>
     <div class="silent-sub">اس کے بعد 20 سیکنڈ کا خاموش وقت شروع ہوگا</div>
+  </div>
+
+  <div id="tasbeehVoiceIntroNotice" class="hidden" aria-live="polite">
+    <div class="voice-intro-title">🎙️ بول کر درود شریف پڑھنا شروع کریں</div>
+    <div class="voice-intro-sub">میں سن رہا ہوں۔ اگر آپ دل میں پڑھنا چاہتے ہیں تو <b>Stop (بند)</b> پر کلک کریں۔</div>
+    <div class="voice-intro-count" id="tasbeehVoiceIntroCount">5 سیکنڈ</div>
   </div>
 
   <div id="tasbeehQuestionPopup" class="hidden" role="dialog" aria-live="polite">
@@ -2174,7 +2198,12 @@ function switchBottomTab(tabName) {
         document.getElementById("navTasbeeh").classList.add("active");
         document.getElementById("daroodCard").classList.remove("hidden");
         if (!tasbeehListeningActive) {
-          setTimeout(() => { if (document.getElementById('rewardTab') && !document.getElementById('rewardTab').classList.contains('hidden')) startVoiceRecognition('countBtn', 'statusMsg', false); }, 120);
+          setTimeout(() => {
+            if (document.getElementById('rewardTab') && !document.getElementById('rewardTab').classList.contains('hidden')) {
+              showTasbeehVoiceIntro();
+              startVoiceRecognition('countBtn', 'statusMsg', false);
+            }
+          }, 120);
         }
       } else if (tabName === 'profile') {
         document.getElementById("profileTab").classList.remove("hidden");
@@ -3239,6 +3268,8 @@ function switchBottomTab(tabName) {
     let tasbeehSilentIntroTimer = null;
     let tasbeehSilentRoundTimer = null;
     let tasbeehSilentCountdownTimer = null;
+    let tasbeehVoiceIntroTimer = null;
+    let tasbeehVoiceIntroCountdownTimer = null;
 
     function resetDaroodWordHighlight() {
       document.querySelectorAll('#daroodArabicText .darood-word').forEach(el => el.classList.remove('read'));
@@ -3441,7 +3472,37 @@ function switchBottomTab(tabName) {
         .trim();
     }
 
+    function hideTasbeehVoiceIntro() {
+      if (tasbeehVoiceIntroTimer) { clearTimeout(tasbeehVoiceIntroTimer); tasbeehVoiceIntroTimer = null; }
+      if (tasbeehVoiceIntroCountdownTimer) { clearInterval(tasbeehVoiceIntroCountdownTimer); tasbeehVoiceIntroCountdownTimer = null; }
+      const popup = document.getElementById('tasbeehVoiceIntroNotice');
+      if (popup) popup.classList.add('hidden');
+    }
+
+    function showTasbeehVoiceIntro() {
+      hideTasbeehVoiceIntro();
+      const popup = document.getElementById('tasbeehVoiceIntroNotice');
+      const count = document.getElementById('tasbeehVoiceIntroCount');
+      if (!popup) return;
+      popup.classList.remove('hidden');
+      let left = 5;
+      if (count) count.innerText = left + ' سیکنڈ';
+      tasbeehVoiceIntroCountdownTimer = setInterval(() => {
+        left--;
+        if (count) count.innerText = Math.max(0, left) + ' سیکنڈ';
+        if (left <= 0) {
+          clearInterval(tasbeehVoiceIntroCountdownTimer);
+          tasbeehVoiceIntroCountdownTimer = null;
+        }
+      }, 1000);
+      tasbeehVoiceIntroTimer = setTimeout(() => {
+        tasbeehVoiceIntroTimer = null;
+        hideTasbeehVoiceIntro();
+      }, 5000);
+    }
+
     function hideTasbeehSilentUI() {
+      hideTasbeehVoiceIntro();
       if (tasbeehSilentIntroTimer) { clearTimeout(tasbeehSilentIntroTimer); tasbeehSilentIntroTimer = null; }
       if (tasbeehSilentRoundTimer) { clearTimeout(tasbeehSilentRoundTimer); tasbeehSilentRoundTimer = null; }
       if (tasbeehSilentCountdownTimer) { clearInterval(tasbeehSilentCountdownTimer); tasbeehSilentCountdownTimer = null; }
@@ -3461,7 +3522,7 @@ function switchBottomTab(tabName) {
       requestScreenWakeLock();
       const notice = document.getElementById('tasbeehSilentNotice');
       if (notice) {
-        notice.innerHTML = '<div class="silent-title">🤲 دل میں درود شریف پڑھیں</div><div class="silent-count" id="tasbeehSilentRoundCount">15 سیکنڈ</div><div class="silent-sub">خاموش پڑھنے کا وقت</div>';
+        notice.innerHTML = '<div class="silent-title">🤲 دل میں درود شریف پڑھیں</div><div class="silent-count" id="tasbeehSilentRoundCount">20 سیکنڈ</div><div class="silent-sub">خاموش پڑھنے کا وقت</div>';
         notice.classList.remove('hidden');
       }
       let roundLeft = 20;
@@ -3480,10 +3541,11 @@ function switchBottomTab(tabName) {
         if (notice) notice.classList.add('hidden');
         const question = document.getElementById('tasbeehQuestionPopup');
         if (question) question.classList.remove('hidden');
-      }, 15000);
+      }, 20000);
     }
 
     function startTasbeehSilentReadingMode() {
+      hideTasbeehVoiceIntro();
       // Silent-reading mode belongs only to the Tasbeeh page.
       const rewardTab = document.getElementById('rewardTab');
       if (!rewardTab || rewardTab.classList.contains('hidden')) return;
@@ -3513,7 +3575,7 @@ function switchBottomTab(tabName) {
 
         let roundLeft = 20;
         if (notice) {
-          notice.innerHTML = '<div class="silent-title">🤲 دل میں درود شریف پڑھیں</div><div class="silent-count" id="tasbeehSilentRoundCount">15 سیکنڈ</div><div class="silent-sub">خاموش پڑھنے کا وقت</div>';
+          notice.innerHTML = '<div class="silent-title">🤲 دل میں درود شریف پڑھیں</div><div class="silent-count" id="tasbeehSilentRoundCount">20 سیکنڈ</div><div class="silent-sub">خاموش پڑھنے کا وقت</div>';
           notice.classList.remove('hidden');
         }
         const roundCount = document.getElementById('tasbeehSilentRoundCount');
@@ -3532,7 +3594,7 @@ function switchBottomTab(tabName) {
           if (notice) notice.classList.add('hidden');
           const question = document.getElementById('tasbeehQuestionPopup');
           if (question) question.classList.remove('hidden');
-        }, 15000);
+        }, 20000);
       }, 3000);
     }
 
@@ -3578,6 +3640,7 @@ function switchBottomTab(tabName) {
     }
 
     function stopTasbeehListening() {
+      hideTasbeehVoiceIntro();
       // Set the flag FIRST so onend/error handlers cannot restart recognition.
       tasbeehListeningActive = false;
       if (tasbeehAutoRestartTimer) { clearTimeout(tasbeehAutoRestartTimer); tasbeehAutoRestartTimer = null; }
