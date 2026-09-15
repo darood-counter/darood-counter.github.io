@@ -862,17 +862,7 @@
     .site-footer-links{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 8px 90px;text-align:center}
     .site-footer-links a{color:#14532d;text-decoration:none;font-size:12px;font-weight:700;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:999px;padding:6px 10px}
 
-  
-.tasbeeh-silent-confirm-center{
-  position:fixed !important;
-  left:50% !important;
-  top:50% !important;
-  transform:translate(-50%,-50%) !important;
-  margin:0 !important;
-  z-index:99999 !important;
-}
-
-</style>
+  </style>
 </head>
 <body>
 
@@ -2210,8 +2200,8 @@ function switchBottomTab(tabName) {
         if (!tasbeehListeningActive && !tasbeehSilentModeActive) {
            setTimeout(() => {
              if (document.getElementById('rewardTab') && !document.getElementById('rewardTab').classList.contains('hidden')) {
+               showTasbeehVoiceStartNotice();
                startVoiceRecognition('countBtn', 'statusMsg', false);
-               if (tasbeehListeningActive) showTasbeehVoiceStartNotice();
              }
            }, 120);
          }
@@ -3630,7 +3620,7 @@ function switchBottomTab(tabName) {
           triggerVibration();
           hideTasbeehSilentUI();
           // After every successful silent count, automatically start the next
-          // silent 15-second round so the process continues continuously.
+          // silent 20-second round so the process continues continuously.
           setTimeout(() => {
             if (document.hidden) return;
             const rewardTab = document.getElementById('rewardTab');
@@ -3648,12 +3638,10 @@ function switchBottomTab(tabName) {
     }
 
     function startTasbeehVoiceFromUser() {
+      hideTasbeehVoiceStartNotice();
       hideTasbeehSilentUI();
       resetDaroodWordHighlight();
-      // Start listening first. If the browser refuses microphone recognition,
-      // the page still remains open and the popup is not shown falsely.
       startVoiceRecognition('countBtn', 'statusMsg', false);
-      if (tasbeehListeningActive) showTasbeehVoiceStartNotice();
     }
 
     function stopTasbeehListening() {
@@ -4060,21 +4048,7 @@ function switchBottomTab(tabName) {
       try {
         recognition.start();
       } catch (e) {
-        if (!isComp) {
-          tasbeehListeningActive = false;
-          activeTasbeehRecognition = null;
-          const voiceIcon = document.getElementById('tasbeehVoiceControlIcon');
-          if (voiceIcon) voiceIcon.innerText = '▶️ شروع';
-          const countBtnEl = document.getElementById('countBtn');
-          if (countBtnEl) countBtnEl.classList.remove('listening');
-          if (statusEl) {
-            statusEl.style.color = '#ef4444';
-            statusEl.innerText = 'مائیک شروع نہیں ہو سکا۔ دوبارہ Start دبائیں۔';
-          }
-          releaseScreenWakeLock();
-        } else {
-          finishListening();
-        }
+        finishListening();
       }
     }
 
@@ -4140,41 +4114,5 @@ function switchBottomTab(tabName) {
       startVoiceRecognition('compCountBtn', 'compStatusMsg', true);
     };
   </script>
-
-<script>
-(function(){
-  function visible(el){
-    if(!el) return false;
-    const s=getComputedStyle(el);
-    return s.display!=="none" && s.visibility!=="hidden" && el.offsetParent!==null;
-  }
-  function centerConfirm(){
-    const els=document.querySelectorAll("div,section,aside,dialog");
-    for(const el of els){
-      const t=(el.textContent||"").trim();
-      if((t.includes("ہاں")||t.includes("Yes")) &&
-         (t.includes("نہیں")||t.includes("No")) &&
-         (t.includes("درود")||t.includes("پڑھا")) &&
-         visible(el) &&
-         el.querySelector("button,[role='button']")){
-        el.classList.add("tasbeeh-silent-confirm-center");
-      }
-    }
-  }
-  const ob=new MutationObserver(centerConfirm);
-  ob.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:["style","class"]});
-  document.addEventListener("click",function(e){
-    const b=e.target.closest("button,[role='button']");
-    if(!b) return;
-    const t=(b.textContent||"").trim().toLowerCase();
-    if(t==="ہاں"||t==="نہیں"||t==="yes"||t==="no"){
-      const p=b.closest(".tasbeeh-silent-confirm-center");
-      if(p) setTimeout(()=>p.classList.remove("tasbeeh-silent-confirm-center"),0);
-    }
-  },true);
-  centerConfirm();
-})();
-</script>
-
 </body>
 </html>
