@@ -3648,9 +3648,10 @@ function switchBottomTab(tabName) {
     }
 
     function startTasbeehVoiceFromUser() {
-      hideTasbeehVoiceStartNotice();
       hideTasbeehSilentUI();
       resetDaroodWordHighlight();
+      // Show the same 5-second instruction popup every time voice mode is started.
+      showTasbeehVoiceStartNotice();
       startVoiceRecognition('countBtn', 'statusMsg', false);
     }
 
