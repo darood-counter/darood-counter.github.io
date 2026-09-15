@@ -2210,8 +2210,8 @@ function switchBottomTab(tabName) {
         if (!tasbeehListeningActive && !tasbeehSilentModeActive) {
            setTimeout(() => {
              if (document.getElementById('rewardTab') && !document.getElementById('rewardTab').classList.contains('hidden')) {
-               showTasbeehVoiceStartNotice();
                startVoiceRecognition('countBtn', 'statusMsg', false);
+               showTasbeehVoiceStartNotice();
              }
            }, 120);
          }
@@ -3650,9 +3650,10 @@ function switchBottomTab(tabName) {
     function startTasbeehVoiceFromUser() {
       hideTasbeehSilentUI();
       resetDaroodWordHighlight();
-      // Show the same 5-second instruction popup every time voice mode is started.
-      showTasbeehVoiceStartNotice();
+      // Start voice first; then show the 5-second instruction popup.
+      // This prevents a recognition-start failure from immediately hiding the popup.
       startVoiceRecognition('countBtn', 'statusMsg', false);
+      showTasbeehVoiceStartNotice();
     }
 
     function stopTasbeehListening() {
