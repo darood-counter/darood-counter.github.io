@@ -840,15 +840,11 @@
     #tasbeehSilentNotice .silent-count{font-size:13px;color:#a16207;font-weight:800;margin-top:2px}
     #tasbeehSilentNotice .silent-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
     #tasbeehQuestionPopup{
-      position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100002;
+      position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100002;
       width:min(390px,calc(100% - 28px));box-sizing:border-box;
       background:#fff;border:2px solid var(--accent-gold);border-radius:18px;
       padding:14px;box-shadow:0 12px 35px rgba(0,0,0,.22);text-align:center;
-      animation:tasbeehQuestionCenterIn .22s ease;
-    }
-    @keyframes tasbeehQuestionCenterIn{
-      from{opacity:0;transform:translate(-50%,-50%) scale(.94)}
-      to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+      animation:tasbeehNoticeIn .22s ease;
     }
     #tasbeehQuestionPopup .question-title{font-size:18px;font-weight:900;color:var(--primary-color);line-height:1.5;margin-bottom:10px}
     .tasbeeh-question-actions{display:flex;gap:9px;direction:ltr}
@@ -1298,19 +1294,73 @@
         </div>
       </div>
 
+      <style>
+        .tasbeeh-live-stats{
+          display:grid;
+          grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+          align-items:center;
+          justify-content:center;
+          gap:10px;
+          width:min(100%,520px);
+          margin:4px auto 8px;
+        }
+        .tasbeeh-stat-card{
+          min-width:0;
+          padding:10px 6px;
+          border:1px solid #ead9b0;
+          border-radius:14px;
+          background:#fffdf9;
+          box-shadow:0 4px 12px rgba(0,0,0,.06);
+        }
+        .tasbeeh-stat-label{
+          font-size:11px;
+          color:var(--text-muted);
+          font-weight:700;
+          white-space:nowrap;
+        }
+        .tasbeeh-stat-value{
+          margin-top:3px;
+          font-size:23px;
+          line-height:1.1;
+          color:var(--primary-color);
+          font-weight:800;
+        }
+        .tasbeeh-live-stats .mic-circle-wrapper{
+          margin:0;
+        }
+        @media (max-width:380px){
+          .tasbeeh-live-stats{gap:5px}
+          .tasbeeh-stat-card{padding:8px 4px}
+          .tasbeeh-stat-label{font-size:10px}
+          .tasbeeh-stat-value{font-size:20px}
+        }
+      </style>
+
       <!-- TAB 3: Tasbeeh Tab -->
       <div id="rewardTab" class="hidden" style="text-align: center;">
         <h2 style="font-size: 20px; color: var(--primary-color); margin: 10px 0;">📿 تسبیح کاؤنٹر</h2>
         
         <div id="rewardDaroodSlot"></div>
 
-        <div class="mic-circle-wrapper">
-          <div class="circle-progress"></div>
-          <button class="mic-btn" id="countBtn" type="button" aria-label="تسبیح Voice Start Stop">
-            <span id="tasbeehVoiceControlIcon" style="display:block;font-size:18px;font-weight:800;color:var(--primary-color);line-height:1.1;margin-bottom:4px;">▶️ شروع</span>
-            <span style="font-size: 32px; font-weight: bold; color: var(--primary-color);" id="userTotal">0</span>
-            <span style="font-size: 12px; color: var(--text-muted); font-weight: normal;">آپ کے آج کے درود</span>
-          </button>
+        <div class="tasbeeh-live-stats" id="tasbeehLiveStats">
+          <div class="tasbeeh-stat-card">
+            <div class="tasbeeh-stat-label">📿 کل درود</div>
+            <div class="tasbeeh-stat-value" id="tasbeehLifetimeTotal">0</div>
+          </div>
+
+          <div class="mic-circle-wrapper">
+            <div class="circle-progress"></div>
+            <button class="mic-btn" id="countBtn" type="button" aria-label="تسبیح Voice Start Stop">
+              <span id="tasbeehVoiceControlIcon" style="display:block;font-size:18px;font-weight:800;color:var(--primary-color);line-height:1.1;margin-bottom:4px;">▶️ شروع</span>
+              <span style="font-size: 32px; font-weight: bold; color: var(--primary-color);" id="userTotal">0</span>
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: normal;">آج کے درود</span>
+            </button>
+          </div>
+
+          <div class="tasbeeh-stat-card">
+            <div class="tasbeeh-stat-label">🏆 رینکنگ</div>
+            <div class="tasbeeh-stat-value" id="tasbeehCurrentRank">-</div>
+          </div>
         </div>
         <div id="statusMsg" class="status-msg" style="color: var(--primary-color);"></div>
 
@@ -2298,6 +2348,58 @@ function switchBottomTab(tabName) {
       if (savedCity) document.getElementById("cityInput").value = savedCity;
     });
 
+    // ===== TASBEEH LIVE TOTAL / TODAY / RANK =====
+    let tasbeehTodayListener = null;
+
+    function attachTasbeehTodayStats(uid) {
+      if (!uid || !db) return;
+      if (tasbeehTodayListener) {
+        try { tasbeehTodayListener.off(); } catch(e) {}
+        tasbeehTodayListener = null;
+      }
+
+      const dateKey = getLocalDateKey();
+      const todayRef = db.ref("users/" + uid + "/dailyCounts/" + dateKey);
+      tasbeehTodayListener = todayRef;
+      todayRef.on("value", snapshot => {
+        const todayCount = Number(snapshot.val() || 0);
+        const todayEl = document.getElementById("userTotal");
+        if (todayEl) todayEl.innerText = todayCount;
+      });
+    }
+
+    function updateTasbeehRankAndTotal(snapshot) {
+      const userList = [];
+      let globalTotal = 0;
+
+      snapshot.forEach(child => {
+        const val = child.val() || {};
+        const count = Number(val.count || 0);
+        globalTotal += count;
+        userList.push({
+          uid: child.key,
+          name: val.name || "صارف",
+          count: count
+        });
+      });
+
+      userList.sort((a,b) => b.count - a.count);
+
+      const totalEl = document.getElementById("tasbeehLifetimeTotal");
+      if (currentUser && totalEl) {
+        const mine = userList.find(u => u.uid === currentUser.uid);
+        totalEl.innerText = mine ? mine.count : 0;
+      }
+
+      const rankEl = document.getElementById("tasbeehCurrentRank");
+      if (rankEl && currentUser) {
+        const myIndex = userList.findIndex(u => u.uid === currentUser.uid);
+        rankEl.innerText = myIndex >= 0 ? "#" + (myIndex + 1) : "-";
+      }
+
+      return { userList, globalTotal };
+    }
+
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
@@ -2326,7 +2428,10 @@ function switchBottomTab(tabName) {
 
         db.ref("users/" + user.uid).on("value", snapshot => {
           const data = snapshot.val();
-          document.getElementById("userTotal").innerText = data ? (data.count || 0) : 0;
+          const lifetime = data ? Number(data.count || 0) : 0;
+          const lifetimeEl = document.getElementById("tasbeehLifetimeTotal");
+          if (lifetimeEl) lifetimeEl.innerText = lifetime;
+          attachTasbeehTodayStats(user.uid);
           if (data) {
             if(data.accName) document.getElementById("accName").value = data.accName;
             if(data.accNumber) document.getElementById("accNumber").value = data.accNumber;
@@ -2934,6 +3039,14 @@ function switchBottomTab(tabName) {
       document.getElementById("globalTotalCount").innerText = total;
 
       userList.sort((a, b) => b.count - a.count);
+
+      if (currentUser) {
+        const myIndex = userList.findIndex(u => u.uid === currentUser.uid);
+        const rankEl = document.getElementById("tasbeehCurrentRank");
+        const totalEl = document.getElementById("tasbeehLifetimeTotal");
+        if (rankEl) rankEl.innerText = myIndex >= 0 ? "#" + (myIndex + 1) : "-";
+        if (totalEl) totalEl.innerText = myIndex >= 0 ? userList[myIndex].count : 0;
+      }
 
       // Home Page: Top 5 DAILY competition winners.
       // Each date contributes only one winner: the participant with the highest score.
@@ -3610,11 +3723,24 @@ function switchBottomTab(tabName) {
       if (!currentUser) return;
       const status = document.getElementById('statusMsg');
       const totalEl = document.getElementById('userTotal');
-      const countRef = db.ref('users/' + currentUser.uid + '/count');
-      countRef.transaction(currentCount => Number(currentCount || 0) + 1)
-        .then(result => {
-          const newCount = result && result.snapshot ? Number(result.snapshot.val() || 0) : null;
-          if (totalEl && newCount !== null) totalEl.innerText = newCount;
+      const uid = currentUser.uid;
+      const countRef = db.ref('users/' + uid + '/count');
+      const todayKey = getLocalDateKey();
+      const todayRef = db.ref('users/' + uid + '/dailyCounts/' + todayKey);
+
+      Promise.all([
+        countRef.transaction(currentCount => Number(currentCount || 0) + 1),
+        todayRef.transaction(currentCount => Number(currentCount || 0) + 1)
+      ])
+        .then(results => {
+          const totalResult = results[0];
+          const todayResult = results[1];
+          const newCount = totalResult && totalResult.snapshot ? Number(totalResult.snapshot.val() || 0) : null;
+          const newToday = todayResult && todayResult.snapshot ? Number(todayResult.snapshot.val() || 0) : null;
+          const lifetimeEl = document.getElementById('tasbeehLifetimeTotal');
+          const todayEl = document.getElementById('userTotal');
+          if (lifetimeEl && newCount !== null) lifetimeEl.innerText = newCount;
+          if (todayEl && newToday !== null) todayEl.innerText = newToday;
           if (status) {
             status.style.color = '#15803d';
             status.innerText = '✓ درود شریف شمار ہو گیا!';
@@ -3868,19 +3994,31 @@ function switchBottomTab(tabName) {
             // Tasbeeh Total Count: update ONLY the count field.
             // This prevents other user data from being replaced and makes the
             // total persist safely across logout/login.
-            const countRef = db.ref("users/" + currentUser.uid + "/count");
-            countRef.transaction(currentCount => Number(currentCount || 0) + 1)
-              .then(result => {
-                const totalEl = document.getElementById("userTotal");
-                const newCount = result && result.snapshot ? Number(result.snapshot.val() || 0) : null;
-                if (totalEl && newCount !== null) totalEl.innerText = newCount;
-                console.log("Tasbeeh total saved:", newCount);
-              })
-              .catch(err => {
-                console.error("Tasbeeh count save failed:", err);
-                statusEl.style.color = "#ef4444";
-                statusEl.innerText = "✗ کاؤنٹ محفوظ نہیں ہو سکا، دوبارہ کوشش کریں۔";
-              });
+            const uid = currentUser.uid;
+            const countRef = db.ref("users/" + uid + "/count");
+            const todayKey = getLocalDateKey();
+            const todayRef = db.ref("users/" + uid + "/dailyCounts/" + todayKey);
+
+            Promise.all([
+              countRef.transaction(currentCount => Number(currentCount || 0) + 1),
+              todayRef.transaction(currentCount => Number(currentCount || 0) + 1)
+            ]).then(results => {
+              const totalResult = results[0];
+              const todayResult = results[1];
+              const newTotal = totalResult && totalResult.snapshot ? Number(totalResult.snapshot.val() || 0) : null;
+              const newToday = todayResult && todayResult.snapshot ? Number(todayResult.snapshot.val() || 0) : null;
+
+              const lifetimeEl = document.getElementById("tasbeehLifetimeTotal");
+              const todayEl = document.getElementById("userTotal");
+              if (lifetimeEl && newTotal !== null) lifetimeEl.innerText = newTotal;
+              if (todayEl && newToday !== null) todayEl.innerText = newToday;
+
+              console.log("Tasbeeh total/today saved:", newTotal, newToday);
+            }).catch(err => {
+              console.error("Tasbeeh count save failed:", err);
+              statusEl.style.color = "#ef4444";
+              statusEl.innerText = "✗ کاؤنٹ محفوظ نہیں ہو سکا، دوبارہ کوشش کریں۔";
+            });
           }
 
           if (isComp) {
