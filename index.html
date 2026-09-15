@@ -182,6 +182,52 @@
       font-family: 'Jameel Noori Nastaleeq', sans-serif;
     }
 
+
+    /* Elegant compact user welcome bar */
+    .user-header{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      min-height:48px;
+      padding:6px 8px;
+      margin-bottom:10px;
+      background:linear-gradient(135deg,#f8fffb,#fffdf7);
+      border:1px solid rgba(197,160,89,.35);
+      border-radius:14px;
+      box-shadow:0 4px 14px rgba(13,59,34,.07);
+      direction:rtl;
+    }
+    .user-header-side{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .user-header-actions{direction:ltr;}
+    #daroodReminderBtn{
+      width:34px;height:34px;min-width:34px;border:1px solid #bbf7d0;border-radius:50%;
+      background:#f0fdf4;color:#15803d;font-size:18px;line-height:1;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;padding:0;
+      box-shadow:0 2px 7px rgba(21,128,61,.14);transition:.2s ease;
+    }
+    #daroodReminderBtn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(21,128,61,.18);}
+    .user-welcome-center{
+      flex:1;min-width:0;text-align:center;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;line-height:1.25;
+    }
+    .welcome-text{font-size:13px;color:#164e2b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+    .welcome-text b{color:#0d3b22;}
+    .user-header .live-badge{margin:2px 0 0;padding:1px 7px;font-size:9px;white-space:nowrap;border-radius:20px;}
+    .user-header .live-dot{height:6px;width:6px;}
+    .user-header .logout-btn{
+      padding:4px 9px;font-size:10px;white-space:nowrap;border-radius:8px;
+      background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 2px 6px rgba(239,68,68,.16);
+    }
+    @media(max-width:420px){
+      .user-header{min-height:44px;padding:5px 6px;gap:5px;}
+      #daroodReminderBtn{width:32px;height:32px;min-width:32px;font-size:17px;}
+      .welcome-text{font-size:12px;}
+      .user-header .logout-btn{padding:3px 7px;font-size:9px;}
+      .user-header .live-badge{font-size:8px;padding:1px 6px;}
+    }
+
     .profile-box {
       background: #fffdf9;
       border: 1px solid #fde68a;
@@ -981,14 +1027,18 @@
     </div>
 
     <div id="userInfo" class="hidden">
-      <div class="user-header" style="padding:6px 10px; margin-bottom:10px; font-size:12px; gap:8px; position:relative;">
-        <button id="daroodReminderBtn" type="button" aria-label="درود اور نماز کی روزانہ یاد دہانی" title="درود اور نماز کی روزانہ یاد دہانی" style="width:40px;height:40px;min-width:40px;border:1px solid #bbf7d0;border-radius:50%;background:#f0fdf4;color:#15803d;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(21,128,61,.15);padding:0;">🔔</button>
-        <span id="daroodReminderStatus" style="display:none;">درود اور نماز کی یاد دہانیاں بند ہیں۔</span>
-        <span style="font-size:12px;">خوش آمدید، <b id="userName"></b>!</span>
-        <div class="live-badge" style="margin:0; padding:2px 8px; font-size:10px; white-space:nowrap;">
-          <span class="live-dot" style="height:6px; width:6px;"></span> آن لائن: <span id="onlineCount">0</span>
+      <div class="user-header">
+        <div class="user-header-side user-header-actions">
+          <button id="daroodReminderBtn" type="button" aria-label="درود اور نماز کی روزانہ یاد دہانی" title="درود اور نماز کی روزانہ یاد دہانی">🔔</button>
+          <button class="logout-btn" id="logoutBtn">لاگ آؤٹ</button>
         </div>
-        <button class="logout-btn" id="logoutBtn" style="padding:3px 8px; font-size:10px; white-space:nowrap;">لاگ آؤٹ</button>
+        <div class="user-welcome-center">
+          <div class="welcome-text">خوش آمدید، <b id="userName"></b>!</div>
+          <div class="live-badge">
+            <span class="live-dot"></span> آن لائن: <span id="onlineCount">0</span>
+          </div>
+        </div>
+        <span id="daroodReminderStatus" style="display:none;">درود اور نماز کی یاد دہانیاں بند ہیں۔</span>
       </div>
 
       <div id="daroodCard" class="darood-card hidden">
