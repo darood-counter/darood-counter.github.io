@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="ur" dir="rtl">
 <head>
-  <meta name="google-adsense-account" content="ca-pub-9990487458483204">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9990487458483204"
-       crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-9990487458483204">
+
   <title>Mehfil-E-Darood — Final V7 (Admin Home)</title>
   <link href="https://fonts.googleapis.com/css2?family=Jameel+Noori+Nastaleeq&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9990487458483204"
+     crossorigin="anonymous"></script>
+
   <style>
     :root {
       --primary-color: #0d3b22;
@@ -42,6 +44,13 @@
       border-bottom-right-radius: 25px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       margin-bottom: -20px;
+    }
+
+    /* Mobile-friendly fixed-in-view header */
+    .top-header{
+      position:sticky;
+      top:0;
+      z-index:9999;
     }
 
     .brand-title {
@@ -994,17 +1003,6 @@
         </button>
       </div>
 
-      <!-- ANDROID APP DOWNLOAD NOTICE -->
-      <div id="appDownloadNotice" style="margin:6px 0 10px; background:linear-gradient(135deg,#064e3b,#0f766e); color:#fff; border:1px solid rgba(245,208,90,.7); border-radius:10px; padding:7px 9px; box-shadow:0 4px 12px rgba(0,0,0,.12); display:flex; align-items:center; gap:8px; direction:rtl;">
-        <div style="font-size:20px; line-height:1;">📱</div>
-        <div style="flex:1; min-width:0; text-align:right;">
-          <div style="font-size:12px; font-weight:800; line-height:1.35;">محفلِ درود کی Android App</div>
-          <div style="font-size:10px; opacity:.9; line-height:1.35;">اب ویب سائٹ کو موبائل App میں بھی استعمال کریں</div>
-        </div>
-        <a href="https://github.com/darood-counter/Mehfil-E-Darood/releases/download/V1.0/mehfil-e-darood.apk" download="Mehfil-E-Darood.apk" style="display:inline-block; background:#f5d05a; color:#173b2d; text-decoration:none; font-size:10px; font-weight:800; padding:7px 9px; border-radius:7px; white-space:nowrap;">⬇️ APK ڈاؤنلوڈ</a>
-        <button onclick="document.getElementById('appDownloadNotice').style.display='none'" aria-label="بند کریں" style="background:transparent; color:#fff; border:0; font-size:16px; line-height:1; padding:2px 3px; cursor:pointer;">×</button>
-      </div>
-
       <!-- TAB 1: Home Tab -->
       <div id="mainTab">
 
@@ -1336,6 +1334,41 @@
           .tasbeeh-live-stats .mic-circle-wrapper{transform:scale(.88)}
         }
         @media(max-width:360px){.tasbeeh-live-stats{gap:4px;padding:8px 4px}.tasbeeh-stat-value{font-size:19px}.tasbeeh-stat-label{font-size:9px}}
+
+        /* ===== TASBEEH MOBILE POLISH ===== */
+        #rewardTab{padding:0 2px 14px;box-sizing:border-box}
+        #rewardTab>h2{font-weight:900;letter-spacing:.1px}
+        #rewardTab .tasbeeh-live-stats{position:relative;overflow:hidden}
+        #rewardTab .status-msg{min-height:24px;padding:5px 9px;border-radius:12px;background:rgba(255,255,255,.78);max-width:520px;margin:7px auto 10px;box-sizing:border-box}
+
+        /* Show about five leaderboard rows at once, then scroll */
+        #rewardTab table,#compTab table{width:100%;border-collapse:separate;border-spacing:0}
+        #rewardTab table thead,#compTab table thead{display:table;width:100%;table-layout:fixed}
+        #rewardTab table tbody,#compTab table tbody{display:block;max-height:225px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+        #rewardTab table tbody tr,#compTab table tbody tr{display:table;width:100%;table-layout:fixed}
+        #rewardTab table th,#rewardTab table td,#compTab table th,#compTab table td{box-sizing:border-box}
+
+        @media(max-width:480px){
+          #rewardTab{padding-left:0;padding-right:0}
+          #rewardTab>h2{font-size:21px!important;margin:7px 0 8px!important}
+          #rewardTab .tasbeeh-live-stats{grid-template-columns:minmax(64px,1fr) minmax(122px,1.35fr) minmax(64px,1fr);gap:5px;padding:9px 5px;margin:6px auto 9px;border-radius:20px}
+          #rewardTab .tasbeeh-stat-card{padding:9px 3px;border-radius:13px}
+          #rewardTab .tasbeeh-stat-value{font-size:20px}
+          #rewardTab .tasbeeh-stat-label{font-size:10px;white-space:nowrap}
+          #rewardTab .tasbeeh-today-under-total{font-size:10px}
+          #rewardTab .tasbeeh-live-stats .mic-circle-wrapper{width:145px;height:145px;transform:none}
+          #rewardTab .tasbeeh-live-stats .mic-btn{width:119px;height:119px}
+          #rewardTab .tasbeeh-live-stats .mic-btn #userTotal{font-size:29px!important}
+          #rewardTab .tasbeeh-live-stats .mic-btn span[style*="font-size: 12px"]{font-size:11px!important}
+          #rewardTab table tbody,#compTab table tbody{max-height:220px}
+        }
+
+        @media(max-width:360px){
+          #rewardTab .tasbeeh-live-stats{grid-template-columns:58px minmax(116px,1fr) 58px;gap:3px;padding:8px 3px}
+          #rewardTab .tasbeeh-live-stats .mic-circle-wrapper{width:132px;height:132px}
+          #rewardTab .tasbeeh-live-stats .mic-btn{width:108px;height:108px}
+          #rewardTab .tasbeeh-live-stats .mic-btn #userTotal{font-size:26px!important}
+        }
       </style>
 
       <!-- TAB 3: Tasbeeh Tab -->
