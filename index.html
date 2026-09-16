@@ -976,7 +976,7 @@
 
     /* ===== TASBEEH VOICE START NOTICE ===== */
     #tasbeehVoiceStartNotice{
-      position:fixed;top:calc(var(--tasbeeh-popup-top, 76px));left:50%;transform:translateX(-50%);z-index:100003;
+      position:fixed;top:var(--tasbeeh-popup-top, 76px);left:50%;transform:translateX(-50%);z-index:100003;
       width:min(390px,calc(100% - 28px));box-sizing:border-box;
       background:#fff;border:2px solid var(--accent-gold);border-radius:18px;
       padding:13px 15px;box-shadow:0 12px 35px rgba(0,0,0,.22);
@@ -994,7 +994,7 @@
 
     /* ===== TASBEEH SILENT READING MODE ===== */
     #tasbeehSilentNotice{
-      position:fixed;top:calc(var(--tasbeeh-popup-top, 76px));left:50%;transform:translateX(-50%);z-index:100001;
+      position:fixed;top:var(--tasbeeh-popup-top, 76px);left:50%;transform:translateX(-50%);z-index:100001;
       width:min(360px,calc(100% - 28px));box-sizing:border-box;
       background:#fffdf7;border:1.5px solid var(--accent-gold);border-radius:16px;
       padding:11px 14px;box-shadow:0 10px 30px rgba(0,0,0,.18);text-align:center;
@@ -1004,7 +1004,7 @@
     #tasbeehSilentNotice .silent-count{font-size:13px;color:#a16207;font-weight:800;margin-top:2px}
     #tasbeehSilentNotice .silent-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
     #tasbeehQuestionPopup{
-      position:fixed;top:calc(var(--tasbeeh-popup-top, 76px));left:50%;transform:translateX(-50%);z-index:100002;
+      position:fixed;top:var(--tasbeeh-popup-top, 76px);left:50%;transform:translateX(-50%);z-index:100002;
       width:min(390px,calc(100% - 28px));box-sizing:border-box;
       background:#fff;border:2px solid var(--accent-gold);border-radius:18px;
       padding:14px;box-shadow:0 12px 35px rgba(0,0,0,.22);text-align:center;
@@ -3815,6 +3815,7 @@ function switchBottomTab(tabName) {
     }
 
     function showTasbeehVoiceStartNotice() {
+      positionTasbeehPopupAboveButton();
       hideTasbeehVoiceStartNotice();
       const notice = document.getElementById('tasbeehVoiceStartNotice');
       const countEl = document.getElementById('tasbeehVoiceStartNoticeCount');
@@ -3835,6 +3836,19 @@ function switchBottomTab(tabName) {
       tasbeehVoiceStartNoticeTimer = setTimeout(hideTasbeehVoiceStartNotice, 5000);
     }
 
+    // Keep Tasbeeh popups directly above the round Start/Stop button.
+    function positionTasbeehPopupAboveButton() {
+      const btn = document.getElementById('countBtn');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const gap = 12;
+      const popupHeightGuess = 115;
+      let top = rect.top - popupHeightGuess - gap;
+      // Keep the popup inside the visible screen.
+      top = Math.max(58, top);
+      document.documentElement.style.setProperty('--tasbeeh-popup-top', `${Math.round(top)}px`);
+    }
+
     function hideTasbeehSilentUI() {
       if (tasbeehSilentIntroTimer) { clearTimeout(tasbeehSilentIntroTimer); tasbeehSilentIntroTimer = null; }
       if (tasbeehSilentRoundTimer) { clearTimeout(tasbeehSilentRoundTimer); tasbeehSilentRoundTimer = null; }
@@ -3847,6 +3861,8 @@ function switchBottomTab(tabName) {
       // Silent mode is over; normal voice mode will request the lock again if needed.
       if (typeof releaseScreenWakeLock === 'function') releaseScreenWakeLock();
     }
+
+    window.addEventListener('resize', positionTasbeehPopupAboveButton);
 
     function startTasbeehSilentRound() {
       const rewardTab = document.getElementById('rewardTab');
@@ -3873,7 +3889,7 @@ function switchBottomTab(tabName) {
         if (!tasbeehSilentModeActive) return;
         if (notice) notice.classList.add('hidden');
         const question = document.getElementById('tasbeehQuestionPopup');
-        if (question) question.classList.remove('hidden');
+        if (question) { positionTasbeehPopupAboveButton(); question.classList.remove('hidden'); }
       }, 15000);
     }
 
@@ -3925,7 +3941,7 @@ function switchBottomTab(tabName) {
           if (!tasbeehSilentModeActive) return;
           if (notice) notice.classList.add('hidden');
           const question = document.getElementById('tasbeehQuestionPopup');
-          if (question) question.classList.remove('hidden');
+          if (question) { positionTasbeehPopupAboveButton(); question.classList.remove('hidden'); }
         }, 15000);
       }, 3000);
     }
