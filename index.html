@@ -1381,7 +1381,7 @@
           <tbody id="compBoard"><tr><td colspan="3">لوڈ ہو رہا ہے...</td></tr></tbody>
         </table>
 
-        <h3 style="color:var(--primary-color); margin-top:20px; font-size:16px;">🏆 آخری 5 ونرز</h3>
+        <h3 style="color:var(--primary-color); margin-top:20px; font-size:16px;">🏆 Top 5 Winners</h3>
         <div id="competitionLast5Winners">
           <div style="text-align:center; padding:14px;">لوڈ ہو رہا ہے...</div>
         </div>
@@ -1496,12 +1496,12 @@
         #rewardTab .tasbeeh-live-stats{position:relative;overflow:hidden}
         #rewardTab .status-msg{min-height:24px;padding:5px 9px;border-radius:12px;background:rgba(255,255,255,.78);max-width:520px;margin:7px auto 10px;box-sizing:border-box}
 
-        /* Leaderboards: keep the original ranking/table layout, with a clean 5-row scroll area */
-        /* Tasbeeh leaderboard: show 5 rows with smooth vertical scroll; competition leaderboard stays unchanged */
+        /* Leaderboards: keep the original ranking/table layout without a forced scroll area */
+        /* Tasbeeh leaderboard: all rows remain visible; competition leaderboard stays unchanged */
         #rewardTab table{width:100%;border-collapse:collapse;table-layout:fixed}
         #rewardTab table thead{display:block;width:100%}
         #rewardTab table thead tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
-        #rewardTab table tbody{display:block;width:100%;max-height:225px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+        #rewardTab table tbody{display:block;width:100%;max-height:none;overflow:visible}
         #rewardTab table tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
         #rewardTab table th,#rewardTab table td{box-sizing:border-box;min-width:0}
 
@@ -1517,7 +1517,6 @@
           #rewardTab .tasbeeh-live-stats .mic-btn{width:119px;height:119px}
           #rewardTab .tasbeeh-live-stats .mic-btn #userTotal{font-size:29px!important}
           #rewardTab .tasbeeh-live-stats .mic-btn span[style*="font-size: 12px"]{font-size:11px!important}
-          #rewardTab table tbody{max-height:220px}
         }
 
         @media(max-width:360px){
@@ -3278,38 +3277,28 @@ function switchBottomTab(tabName) {
             : `<span class="pending-badge">پیمنٹ زیرِ عمل</span>`;
 
           const proof = isPaid && w.paymentProof
-            ? `<div style="margin-top:7px;text-align:left;">
-                 <a href="${String(w.paymentProof).replace(/"/g,'&quot;')}" target="_blank" rel="noopener"
-                    style="display:inline-block;background:#0d3b22;color:#fff;text-decoration:none;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:bold;">
-                    📎 پیمنٹ پروف دیکھیں
-                 </a>
-               </div>`
+            ? `<a href="${String(w.paymentProof).replace(/"/g,'&quot;')}" target="_blank" rel="noopener"
+                 style="display:inline-block;background:#0d3b22;color:#fff;text-decoration:none;padding:3px 6px;border-radius:6px;font-size:9px;font-weight:bold;white-space:nowrap;">📎 پروف</a>`
             : "";
 
           const cert = isPaid
-            ? `<div style="margin-top:7px;text-align:left;">
-                 <button onclick="downloadSpecificCertificate('${String(w.name||"Winner").replace(/'/g,"\\'")}', ${Number(w.count||0)}, '${String(w.dateKey).replace(/'/g,"\\'")}')"
-                   style="background:linear-gradient(135deg,#0d3b22,#166534);color:#fff;border:0;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:bold;cursor:pointer;font-family:inherit;">
-                   📜 سرٹیفکیٹ ڈاؤنلوڈ
-                 </button>
-               </div>`
+            ? `<button onclick="downloadSpecificCertificate('${String(w.name||"Winner").replace(/'/g,"\'")}', ${Number(w.count||0)}, '${String(w.dateKey).replace(/'/g,"\'")}')"
+                 style="background:linear-gradient(135deg,#0d3b22,#166534);color:#fff;border:0;padding:3px 6px;border-radius:6px;font-size:9px;font-weight:bold;cursor:pointer;font-family:inherit;white-space:nowrap;">📜 سرٹیفکیٹ</button>`
             : "";
 
-          return `<div class="proof-item" style="text-align:right;background:#fffdf9;border:1px solid #ead9b0;border-radius:14px;padding:12px;margin:9px 0;box-shadow:0 3px 10px rgba(0,0,0,.05);">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-              <div style="font-size:19px;">${medal}</div>
-              <div style="flex:1;text-align:right;">
-                <div style="font-weight:bold;color:var(--primary-color);">${w.name}</div>
-                <div style="font-size:11px;color:var(--text-muted);">📅 ${w.dateKey}</div>
+          return `<div class="proof-item" style="text-align:right;background:#fffdf9;border:1px solid #ead9b0;border-radius:11px;padding:7px 9px;margin:5px 0;box-shadow:0 2px 7px rgba(0,0,0,.04);">
+            <div style="display:flex;align-items:center;gap:7px;min-width:0;">
+              <div style="font-size:17px;flex:0 0 auto;">${medal}</div>
+              <div style="flex:1;min-width:0;text-align:right;line-height:1.35;">
+                <div style="font-weight:900;color:var(--primary-color);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${w.name}</div>
+                <div style="font-size:10px;color:var(--text-muted);">📅 ${w.dateKey}</div>
               </div>
-              <div style="text-align:center;min-width:62px;">
-                <div style="font-weight:bold;">${Number(w.count||0)}</div>
-                <div style="font-size:10px;color:var(--text-muted);">درود</div>
+              <div style="text-align:center;min-width:48px;flex:0 0 auto;">
+                <div style="font-weight:900;font-size:14px;">${Number(w.count||0)}</div>
+                <div style="font-size:9px;color:var(--text-muted);">درود</div>
               </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap;flex:0 0 auto;">${badge}${proof}${cert}</div>
             </div>
-            <div style="margin-top:7px;text-align:center;">${badge}</div>
-            ${proof}
-            ${cert}
           </div>`;
         }).join("");
       });
