@@ -790,6 +790,22 @@
       text-align: center;
     }
   
+    /* ===== ALL COMPETITION PARTICIPANTS CARDS ===== */
+    .competition-board-title{color:#a16207;margin:18px 0 9px;font-size:16px;font-weight:900}
+    .competition-board-cards{display:flex;flex-direction:column;gap:7px;text-align:right}
+    .competition-user-card{display:grid;grid-template-columns:58px minmax(0,1fr) 72px;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:14px;background:linear-gradient(135deg,#fff,#fafdfb);box-shadow:0 3px 10px rgba(13,59,34,.05);min-height:54px;box-sizing:border-box}
+    .competition-top-card{border-color:rgba(197,160,89,.55);background:linear-gradient(135deg,#fffdf5,#f8fff9)}
+    .competition-rank{display:flex;align-items:center;justify-content:center;gap:3px;font-size:17px;font-weight:900;color:#14532d;direction:ltr}
+    .competition-rank span{font-size:11px;color:#6b7280}
+    .competition-user-info{min-width:0}
+    .competition-user-name{font-size:14px;font-weight:900;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .competition-user-label{font-size:9px;color:#6b7280;margin-top:1px}
+    .competition-score{text-align:center;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:3px 5px;line-height:1.05;color:#92400e}
+    .competition-score b{display:block;font-size:17px}
+    .competition-score small{font-size:8px}
+    .competition-empty{text-align:center;padding:12px;border:1px dashed #d1d5db;border-radius:12px;color:#6b7280;font-size:12px;background:#fafafa}
+    @media(max-width:480px){.competition-user-card{grid-template-columns:52px minmax(0,1fr) 66px;padding:7px 8px;min-height:51px}.competition-user-name{font-size:13px}.competition-rank{font-size:16px}.competition-score b{font-size:16px}.competition-board-title{font-size:15px;margin-top:16px}}
+
     /* ===== COMPETITION RESULT CARD — matched to the supplied design ===== */
     .comp-result-card{width:100%;max-width:620px;margin:14px auto 10px;padding:12px 12px 14px;box-sizing:border-box;border:1.5px solid #d6a94a;border-radius:20px;background:linear-gradient(145deg,#fffdf7,#fff7df);box-shadow:0 7px 22px rgba(180,120,20,.14);position:relative;overflow:visible}
     .comp-result-title{text-align:center;color:#14532d;font-size:18px;font-weight:900;line-height:1.45;margin:0 0 2px}
@@ -1028,34 +1044,7 @@
     .site-footer-links{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 8px 90px;text-align:center}
     .site-footer-links a{color:#14532d;text-decoration:none;font-size:12px;font-weight:700;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:999px;padding:6px 10px}
 
-  
-/* Tasbeeh Top 5 leaderboard cards */
-.tasbeeh-leaderboard-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:25px;margin-bottom:12px;padding:14px 15px;border-radius:18px;background:linear-gradient(135deg,rgba(31,148,112,.12),rgba(31,148,112,.04));border:1px solid rgba(31,148,112,.16);text-align:right}
-.tasbeeh-leaderboard-head h3{margin:0;color:var(--primary-color);font-size:17px}
-.tasbeeh-leaderboard-head p{margin:4px 0 0;color:var(--text-muted);font-size:10px;font-weight:700}
-.leaderboard-live-dot{font-size:10px;font-weight:900;color:#16a34a;white-space:nowrap;direction:ltr}
-.tasbeeh-top5-grid{display:grid;gap:10px}
-.tasbeeh-top5-card{position:relative;display:flex;align-items:center;gap:12px;padding:13px;border-radius:18px;background:var(--card-bg,#fff);border:1px solid rgba(0,0,0,.07);box-shadow:0 5px 18px rgba(0,0,0,.06);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease}
-.tasbeeh-top5-card:hover{transform:translateY(-2px);box-shadow:0 9px 24px rgba(0,0,0,.09)}
-.tasbeeh-top5-card::before{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:var(--primary-color);opacity:.45}
-.tasbeeh-top5-card.rank-1{background:linear-gradient(135deg,rgba(255,193,7,.18),rgba(255,255,255,.98));border-color:rgba(255,193,7,.35)}
-.tasbeeh-top5-card.rank-1::before{background:#d99b00;opacity:1}
-.tasbeeh-top5-card.rank-2{background:linear-gradient(135deg,rgba(148,163,184,.15),rgba(255,255,255,.98))}
-.tasbeeh-top5-card.rank-3{background:linear-gradient(135deg,rgba(180,83,9,.10),rgba(255,255,255,.98))}
-.leaderboard-rank-badge{width:43px;height:43px;min-width:43px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(31,148,112,.10);color:var(--primary-color);font-size:16px;font-weight:900;direction:ltr}
-.rank-1 .leaderboard-rank-badge{background:#fff0b3;color:#a66a00}
-.rank-2 .leaderboard-rank-badge{background:#e7edf3;color:#52606d}
-.rank-3 .leaderboard-rank-badge{background:#f5dfd0;color:#8a4b24}
-.leaderboard-user-info{min-width:0;flex:1;text-align:right}
-.leaderboard-user-name{font-size:14px;font-weight:900;color:var(--primary-color);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.leaderboard-rank-label{font-size:9px;color:var(--text-muted);margin-top:3px;font-weight:700}
-.leaderboard-stats{display:flex;gap:7px;direction:rtl}
-.leaderboard-stat{min-width:57px;text-align:center;padding:7px 6px;border-radius:12px;background:rgba(31,148,112,.06)}
-.leaderboard-stat strong{display:block;font-size:13px;font-weight:900;color:var(--text-color,#222)}
-.leaderboard-stat span{display:block;font-size:8px;color:var(--text-muted);font-weight:700;margin-top:2px}
-.leaderboard-loading,.leaderboard-empty{text-align:center;padding:20px;color:var(--text-muted);font-size:12px;font-weight:700;border:1px dashed rgba(0,0,0,.12);border-radius:16px}
-@media(max-width:480px){.tasbeeh-top5-card{padding:11px 10px;gap:8px}.leaderboard-rank-badge{width:39px;height:39px;min-width:39px;font-size:14px}.leaderboard-user-name{font-size:12px}.leaderboard-stats{gap:4px}.leaderboard-stat{min-width:50px;padding:6px 4px}.leaderboard-stat strong{font-size:12px}.leaderboard-stat span{font-size:7px}}
-</style>
+  </style>
 </head>
 <body>
 
@@ -1402,11 +1391,8 @@
         </div>
         <div style="font-size: 15px; color: #d97706; margin-top: 8px;">مقابلے میں آپ کا اسکور: <b id="compUserTotal">0</b></div>
 
-        <h3 style="color:#d97706; margin-top: 20px; font-size: 16px;">🥇 مقابلے کا Leaderboard</h3>
-        <table>
-          <thead><tr><th>رینک</th><th>صارف</th><th>اسکور</th></tr></thead>
-          <tbody id="compBoard"><tr><td colspan="3">لوڈ ہو رہا ہے...</td></tr></tbody>
-        </table>
+        <h3 class="competition-board-title">🏆 مقابلے میں شریک تمام صارفین</h3>
+        <div id="compBoard" class="competition-board-cards"><div class="competition-empty">لوڈ ہو رہا ہے...</div></div>
 
         <h3 style="color:var(--primary-color); margin-top:20px; font-size:16px;">🏆 Top 5 Winners</h3>
         <div id="competitionLast5Winners">
@@ -1588,16 +1574,11 @@
         </div>
         <div id="statusMsg" class="status-msg" style="color: var(--primary-color);"></div>
 
-        <div class="tasbeeh-leaderboard-head">
-          <div>
-            <h3>🏆 ٹاپ 5 — لائیو Leaderboard</h3>
-            <p>سب سے زیادہ کل درود پڑھنے والے شرکاء</p>
-          </div>
-          <span class="leaderboard-live-dot">● LIVE</span>
-        </div>
-        <div id="board" class="tasbeeh-top5-grid">
-          <div class="leaderboard-loading">لوڈ ہو رہا ہے...</div>
-        </div>
+        <h3 style="color:var(--primary-color); margin-top: 25px; font-size: 16px; text-align: right;">🏆 لائیو Leaderboard</h3>
+        <table>
+          <thead><tr><th>رینک</th><th>صارف</th><th>کل درود</th></tr></thead>
+          <tbody id="board"><tr><td colspan="3">لوڈ ہو رہا ہے...</td></tr></tbody>
+        </table>
       </div>
 
       <!-- TAB 4: About Tab -->
@@ -3343,8 +3324,7 @@ function switchBottomTab(tabName) {
       snapshot.forEach(child => {
         const val = child.val();
         total += (val.count || 0);
-        const dailyCount = (val.dailyCounts && val.dailyCounts[todayDateKey]) || 0;
-        userList.push({ uid: child.key, name: val.name || "صارف", count: val.count || 0, dailyCount: dailyCount });
+        userList.push({ uid: child.key, name: val.name || "صارف", count: val.count || 0 });
       });
 
       document.getElementById("globalTotalCount").innerText = total;
@@ -3363,23 +3343,11 @@ function switchBottomTab(tabName) {
       // Each date contributes only one winner: the participant with the highest score.
       loadHomeDailyTop5Winners();
 
-      const top5 = userList.slice(0, 5);
-      const medals = ["🥇", "🥈", "🥉", "4", "5"];
-      const boardEl = document.getElementById("board");
-      if (boardEl) {
-        boardEl.innerHTML = top5.length ? top5.map((u, i) => `
-          <div class="tasbeeh-top5-card rank-${i + 1}">
-            <div class="leaderboard-rank-badge">${medals[i]}</div>
-            <div class="leaderboard-user-info">
-              <div class="leaderboard-user-name">${u.name}</div>
-              <div class="leaderboard-rank-label">رینک #${i + 1} • لائیو پوزیشن</div>
-            </div>
-            <div class="leaderboard-stats">
-              <div class="leaderboard-stat"><strong>${Number(u.count || 0).toLocaleString()}</strong><span>کل درود</span></div>
-              <div class="leaderboard-stat"><strong>${Number(u.dailyCount || 0).toLocaleString()}</strong><span>آج</span></div>
-            </div>
-          </div>`).join("") : `<div class="leaderboard-empty">کوئی ڈیٹا موجود نہیں</div>`;
-      }
+      let fullTbody = "";
+      userList.forEach((u, i) => {
+        fullTbody += `<tr><td>${i + 1}</td><td>${u.name}</td><td><b>${u.count}</b></td></tr>`;
+      });
+      document.getElementById("board").innerHTML = fullTbody || `<tr><td colspan="3">کوئی ڈیٹا موجود نہیں</td></tr>`;
     });
 
     loadLatestWinnerCertificate();
@@ -3395,11 +3363,16 @@ function switchBottomTab(tabName) {
 
       compList.sort((a, b) => b.count - a.count);
 
-      let tbody = "";
+      let compCards = "";
       compList.forEach((u, i) => {
-        tbody += `<tr><td>${i + 1}</td><td>${u.name}</td><td><b>${u.count}</b></td></tr>`;
+        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
+        compCards += `<div class="competition-user-card ${i < 3 ? "competition-top-card" : ""}">
+          <div class="competition-rank">${medal}<span>#${i + 1}</span></div>
+          <div class="competition-user-info"><div class="competition-user-name">${u.name}</div><div class="competition-user-label">مقابلے کا اسکور</div></div>
+          <div class="competition-score"><b>${u.count}</b><small>درود</small></div>
+        </div>`;
       });
-      document.getElementById("compBoard").innerHTML = tbody || `<tr><td colspan="3">آج کوئی مقابلہ نہیں ہوا</td></tr>`;
+      document.getElementById("compBoard").innerHTML = compCards || `<div class="competition-empty">آج کوئی مقابلہ نہیں ہوا</div>`;
 
       if (currentUser) {
         const myIndex = compList.findIndex(u => u.uid === currentUser.uid);
