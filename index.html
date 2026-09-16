@@ -1028,7 +1028,34 @@
     .site-footer-links{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 8px 90px;text-align:center}
     .site-footer-links a{color:#14532d;text-decoration:none;font-size:12px;font-weight:700;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:999px;padding:6px 10px}
 
-  </style>
+  
+/* Tasbeeh Top 5 leaderboard cards */
+.tasbeeh-leaderboard-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:25px;margin-bottom:12px;padding:14px 15px;border-radius:18px;background:linear-gradient(135deg,rgba(31,148,112,.12),rgba(31,148,112,.04));border:1px solid rgba(31,148,112,.16);text-align:right}
+.tasbeeh-leaderboard-head h3{margin:0;color:var(--primary-color);font-size:17px}
+.tasbeeh-leaderboard-head p{margin:4px 0 0;color:var(--text-muted);font-size:10px;font-weight:700}
+.leaderboard-live-dot{font-size:10px;font-weight:900;color:#16a34a;white-space:nowrap;direction:ltr}
+.tasbeeh-top5-grid{display:grid;gap:10px}
+.tasbeeh-top5-card{position:relative;display:flex;align-items:center;gap:12px;padding:13px;border-radius:18px;background:var(--card-bg,#fff);border:1px solid rgba(0,0,0,.07);box-shadow:0 5px 18px rgba(0,0,0,.06);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease}
+.tasbeeh-top5-card:hover{transform:translateY(-2px);box-shadow:0 9px 24px rgba(0,0,0,.09)}
+.tasbeeh-top5-card::before{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:var(--primary-color);opacity:.45}
+.tasbeeh-top5-card.rank-1{background:linear-gradient(135deg,rgba(255,193,7,.18),rgba(255,255,255,.98));border-color:rgba(255,193,7,.35)}
+.tasbeeh-top5-card.rank-1::before{background:#d99b00;opacity:1}
+.tasbeeh-top5-card.rank-2{background:linear-gradient(135deg,rgba(148,163,184,.15),rgba(255,255,255,.98))}
+.tasbeeh-top5-card.rank-3{background:linear-gradient(135deg,rgba(180,83,9,.10),rgba(255,255,255,.98))}
+.leaderboard-rank-badge{width:43px;height:43px;min-width:43px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(31,148,112,.10);color:var(--primary-color);font-size:16px;font-weight:900;direction:ltr}
+.rank-1 .leaderboard-rank-badge{background:#fff0b3;color:#a66a00}
+.rank-2 .leaderboard-rank-badge{background:#e7edf3;color:#52606d}
+.rank-3 .leaderboard-rank-badge{background:#f5dfd0;color:#8a4b24}
+.leaderboard-user-info{min-width:0;flex:1;text-align:right}
+.leaderboard-user-name{font-size:14px;font-weight:900;color:var(--primary-color);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.leaderboard-rank-label{font-size:9px;color:var(--text-muted);margin-top:3px;font-weight:700}
+.leaderboard-stats{display:flex;gap:7px;direction:rtl}
+.leaderboard-stat{min-width:57px;text-align:center;padding:7px 6px;border-radius:12px;background:rgba(31,148,112,.06)}
+.leaderboard-stat strong{display:block;font-size:13px;font-weight:900;color:var(--text-color,#222)}
+.leaderboard-stat span{display:block;font-size:8px;color:var(--text-muted);font-weight:700;margin-top:2px}
+.leaderboard-loading,.leaderboard-empty{text-align:center;padding:20px;color:var(--text-muted);font-size:12px;font-weight:700;border:1px dashed rgba(0,0,0,.12);border-radius:16px}
+@media(max-width:480px){.tasbeeh-top5-card{padding:11px 10px;gap:8px}.leaderboard-rank-badge{width:39px;height:39px;min-width:39px;font-size:14px}.leaderboard-user-name{font-size:12px}.leaderboard-stats{gap:4px}.leaderboard-stat{min-width:50px;padding:6px 4px}.leaderboard-stat strong{font-size:12px}.leaderboard-stat span{font-size:7px}}
+</style>
 </head>
 <body>
 
@@ -1561,11 +1588,16 @@
         </div>
         <div id="statusMsg" class="status-msg" style="color: var(--primary-color);"></div>
 
-        <h3 style="color:var(--primary-color); margin-top: 25px; font-size: 16px; text-align: right;">🏆 لائیو Leaderboard</h3>
-        <table>
-          <thead><tr><th>رینک</th><th>صارف</th><th>کل درود</th></tr></thead>
-          <tbody id="board"><tr><td colspan="3">لوڈ ہو رہا ہے...</td></tr></tbody>
-        </table>
+        <div class="tasbeeh-leaderboard-head">
+          <div>
+            <h3>🏆 ٹاپ 5 — لائیو Leaderboard</h3>
+            <p>سب سے زیادہ کل درود پڑھنے والے شرکاء</p>
+          </div>
+          <span class="leaderboard-live-dot">● LIVE</span>
+        </div>
+        <div id="board" class="tasbeeh-top5-grid">
+          <div class="leaderboard-loading">لوڈ ہو رہا ہے...</div>
+        </div>
       </div>
 
       <!-- TAB 4: About Tab -->
@@ -3311,7 +3343,8 @@ function switchBottomTab(tabName) {
       snapshot.forEach(child => {
         const val = child.val();
         total += (val.count || 0);
-        userList.push({ uid: child.key, name: val.name || "صارف", count: val.count || 0 });
+        const dailyCount = (val.dailyCounts && val.dailyCounts[todayDateKey]) || 0;
+        userList.push({ uid: child.key, name: val.name || "صارف", count: val.count || 0, dailyCount: dailyCount });
       });
 
       document.getElementById("globalTotalCount").innerText = total;
@@ -3330,11 +3363,23 @@ function switchBottomTab(tabName) {
       // Each date contributes only one winner: the participant with the highest score.
       loadHomeDailyTop5Winners();
 
-      let fullTbody = "";
-      userList.forEach((u, i) => {
-        fullTbody += `<tr><td>${i + 1}</td><td>${u.name}</td><td><b>${u.count}</b></td></tr>`;
-      });
-      document.getElementById("board").innerHTML = fullTbody || `<tr><td colspan="3">کوئی ڈیٹا موجود نہیں</td></tr>`;
+      const top5 = userList.slice(0, 5);
+      const medals = ["🥇", "🥈", "🥉", "4", "5"];
+      const boardEl = document.getElementById("board");
+      if (boardEl) {
+        boardEl.innerHTML = top5.length ? top5.map((u, i) => `
+          <div class="tasbeeh-top5-card rank-${i + 1}">
+            <div class="leaderboard-rank-badge">${medals[i]}</div>
+            <div class="leaderboard-user-info">
+              <div class="leaderboard-user-name">${u.name}</div>
+              <div class="leaderboard-rank-label">رینک #${i + 1} • لائیو پوزیشن</div>
+            </div>
+            <div class="leaderboard-stats">
+              <div class="leaderboard-stat"><strong>${Number(u.count || 0).toLocaleString()}</strong><span>کل درود</span></div>
+              <div class="leaderboard-stat"><strong>${Number(u.dailyCount || 0).toLocaleString()}</strong><span>آج</span></div>
+            </div>
+          </div>`).join("") : `<div class="leaderboard-empty">کوئی ڈیٹا موجود نہیں</div>`;
+      }
     });
 
     loadLatestWinnerCertificate();
