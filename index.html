@@ -806,6 +806,31 @@
     .competition-empty{text-align:center;padding:12px;border:1px dashed #d1d5db;border-radius:12px;color:#6b7280;font-size:12px;background:#fafafa}
     @media(max-width:480px){.competition-user-card{grid-template-columns:52px minmax(0,1fr) 66px;padding:7px 8px;min-height:51px}.competition-user-name{font-size:13px}.competition-rank{font-size:16px}.competition-score b{font-size:16px}.competition-board-title{font-size:15px;margin-top:16px}}
 
+
+    /* ===== COMPACT TODAY LEADER — mobile friendly ===== */
+    .comp-leader-mini{
+      width:100%; box-sizing:border-box; margin:7px 0 9px; padding:7px 10px;
+      display:flex; align-items:center; gap:9px; direction:rtl;
+      border:1px solid #f0c36b; border-radius:12px;
+      background:linear-gradient(135deg,#fffdf5,#fff7df);
+      box-shadow:0 2px 9px rgba(180,120,20,.10);
+    }
+    .comp-leader-crown{
+      width:31px; height:31px; flex:0 0 31px; display:flex; align-items:center; justify-content:center;
+      border-radius:50%; background:#fff1c2; border:1px solid #f3c65f; font-size:17px;
+    }
+    .comp-leader-copy{min-width:0; flex:1; text-align:right; line-height:1.25;}
+    .comp-leader-label{font-size:10px; font-weight:800; color:#a16207; margin-bottom:1px;}
+    .comp-leader-value{font-size:13px; font-weight:900; color:#14532d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .comp-leader-arrow{font-size:13px; color:#d97706; flex:0 0 auto;}
+    @media(max-width:480px){
+      .comp-leader-mini{padding:6px 8px; margin:5px 0 8px; gap:7px; border-radius:10px;}
+      .comp-leader-crown{width:28px;height:28px;flex-basis:28px;font-size:15px;}
+      .comp-leader-label{font-size:9px;}
+      .comp-leader-value{font-size:12px;}
+      .comp-leader-arrow{font-size:11px;}
+    }
+
     /* ===== COMPETITION RESULT CARD — matched to the supplied design ===== */
     .comp-result-card{width:100%;max-width:620px;margin:14px auto 10px;padding:12px 12px 14px;box-sizing:border-box;border:1.5px solid #d6a94a;border-radius:20px;background:linear-gradient(145deg,#fffdf7,#fff7df);box-shadow:0 7px 22px rgba(180,120,20,.14);position:relative;overflow:visible}
     .comp-result-title{text-align:center;color:#14532d;font-size:18px;font-weight:900;line-height:1.45;margin:0 0 2px}
@@ -1346,9 +1371,13 @@
       <div id="compTab" class="hidden">
         <h2 style="font-size: 20px; color: #d97706; margin: 5px 0 10px 0;">🎯 مقابلے کا سیکشن</h2>
 
-        <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7); border:1.5px solid #f59e0b; border-radius:14px; padding:12px; margin:10px 0; text-align:center; box-shadow:0 4px 15px rgba(245,158,11,.15);">
-          <div style="font-size:13px; font-weight:bold; color:#d97706; margin-bottom:3px;">👑 آج کے مقابلے کا لیڈر</div>
-          <div id="compWinnerHighlight" style="font-size:14px; color:#1f2937; font-weight:bold;">لوڈ ہو رہا ہے...</div>
+        <div class="comp-leader-mini" aria-label="آج کے مقابلے کی موجودہ پوزیشن">
+          <div class="comp-leader-crown">👑</div>
+          <div class="comp-leader-copy">
+            <div class="comp-leader-label">آج سب سے آگے</div>
+            <div id="compWinnerHighlight" class="comp-leader-value">لوڈ ہو رہا ہے...</div>
+          </div>
+          <div class="comp-leader-arrow">✦</div>
         </div>
 
         <!-- Top Bar: Online Users + Countdown Timer -->
@@ -3389,7 +3418,7 @@ function switchBottomTab(tabName) {
       const highlightEl = document.getElementById("compWinnerHighlight");
 
       if (topWinner && topWinner.count > 0) {
-        highlightEl.innerHTML = `🌟 <b>${topWinner.name}</b> (${topWinner.count} درود شریف)`;
+        highlightEl.innerHTML = `<b>${topWinner.name}</b> · ${topWinner.count} درود`;
         // Latest qualifying winner certificate is handled by loadLatestWinnerCertificate().
       } else {
         highlightEl.innerText = "آج کے مقابلے کا آغاز ابھی ہوا ہے!";
