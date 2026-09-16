@@ -556,18 +556,27 @@
 
     table { width: 100%; border-collapse: collapse; margin-top: 12px; border-radius: 8px; overflow: hidden; }
     /* ===== TASBEEH LEADERBOARD — TOP 5 ONLY ===== */
-    .tasbeeh-leaderboard-table{margin-top:12px;border-collapse:separate;border-spacing:0 6px;width:100%;}
-    .tasbeeh-leaderboard-table thead th{padding:8px 5px;font-size:11px;white-space:nowrap;}
-    .tasbeeh-leaderboard-table tbody tr{background:#fff;}
-    .tasbeeh-leaderboard-table tbody td{padding:8px 5px;font-size:11px;white-space:nowrap;}
-    .tasbeeh-leaderboard-table tbody tr:first-child td{font-weight:800;}
-    .tasbeeh-rank-medal{font-size:17px;}
-    .tasbeeh-status{font-weight:800;font-size:10px;}
+    /* ===== TASBEEH LEADERBOARD — PREMIUM MOBILE CARDS ===== */
+    .tasbeeh-leaderboard-table{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:10px;table-layout:fixed;}
+    .tasbeeh-leaderboard-table thead th{background:#f6f8f4;color:#5b665e;border:0;padding:9px 4px;font-size:10px;font-weight:800;white-space:nowrap;text-align:center;}
+    .tasbeeh-leaderboard-table thead th:first-child{border-radius:0 10px 10px 0;}
+    .tasbeeh-leaderboard-table thead th:last-child{border-radius:10px 0 0 10px;}
+    .tasbeeh-leaderboard-table tbody tr{background:linear-gradient(135deg,#ffffff,#f8fbf7);box-shadow:0 4px 14px rgba(20,83,45,.08);}
+    .tasbeeh-leaderboard-table tbody td{padding:10px 4px;font-size:10px;font-weight:700;color:#26332b;text-align:center;border-top:1px solid #e5ebe6;border-bottom:1px solid #e5ebe6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .tasbeeh-leaderboard-table tbody td:first-child{border-right:1px solid #e5ebe6;border-radius:0 13px 13px 0;color:#14532d;}
+    .tasbeeh-leaderboard-table tbody td:last-child{border-left:1px solid #e5ebe6;border-radius:13px 0 0 13px;}
+    .tasbeeh-leaderboard-table tbody tr:first-child{background:linear-gradient(135deg,#fffdf3,#fff8d9);box-shadow:0 5px 16px rgba(180,130,20,.13);}
+    .tasbeeh-leaderboard-table tbody tr:nth-child(2){background:linear-gradient(135deg,#fff,#f5f6f7);}
+    .tasbeeh-leaderboard-table tbody tr:nth-child(3){background:linear-gradient(135deg,#fff,#fff5ed);}
+    .tasbeeh-rank-medal{font-size:18px;vertical-align:middle;margin-left:2px;}
+    .tasbeeh-status{display:inline-block;padding:4px 7px;border-radius:999px;background:#eaf5ed;color:#166534;font-size:9px;font-weight:900;line-height:1;}
+    .tasbeeh-leaderboard-table tbody tr:first-child .tasbeeh-status{background:#fef3c7;color:#92400e;}
     @media(max-width:480px){
-      .tasbeeh-leaderboard-table thead th{font-size:9px;padding:7px 2px;}
-      .tasbeeh-leaderboard-table tbody td{font-size:10px;padding:7px 2px;}
-      .tasbeeh-rank-medal{font-size:15px;}
-      .tasbeeh-status{font-size:9px;}
+      .tasbeeh-leaderboard-table{border-spacing:0 7px;}
+      .tasbeeh-leaderboard-table thead th{font-size:8px;padding:8px 2px;}
+      .tasbeeh-leaderboard-table tbody td{font-size:9px;padding:9px 2px;}
+      .tasbeeh-rank-medal{font-size:16px;}
+      .tasbeeh-status{font-size:8px;padding:4px 5px;}
     }
     th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: center; font-size: 13px; }
     th { background-color: var(--primary-color); color: white; font-weight: 600; }
