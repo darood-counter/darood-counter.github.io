@@ -555,29 +555,33 @@
     }
 
     table { width: 100%; border-collapse: collapse; margin-top: 12px; border-radius: 8px; overflow: hidden; }
-    /* ===== TASBEEH LEADERBOARD — TOP 5 ONLY ===== */
-    /* ===== TASBEEH LEADERBOARD — PREMIUM MOBILE CARDS ===== */
-    .tasbeeh-leaderboard-table{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:10px;table-layout:fixed;}
-    .tasbeeh-leaderboard-table thead th{background:#f6f8f4;color:#5b665e;border:0;padding:9px 4px;font-size:10px;font-weight:800;white-space:nowrap;text-align:center;}
-    .tasbeeh-leaderboard-table thead th:first-child{border-radius:0 10px 10px 0;}
-    .tasbeeh-leaderboard-table thead th:last-child{border-radius:10px 0 0 10px;}
-    .tasbeeh-leaderboard-table tbody tr{background:linear-gradient(135deg,#ffffff,#f8fbf7);box-shadow:0 4px 14px rgba(20,83,45,.08);}
-    .tasbeeh-leaderboard-table tbody td{padding:10px 4px;font-size:10px;font-weight:700;color:#26332b;text-align:center;border-top:1px solid #e5ebe6;border-bottom:1px solid #e5ebe6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .tasbeeh-leaderboard-table tbody td:first-child{border-right:1px solid #e5ebe6;border-radius:0 13px 13px 0;color:#14532d;}
-    .tasbeeh-leaderboard-table tbody td:last-child{border-left:1px solid #e5ebe6;border-radius:13px 0 0 13px;}
-    .tasbeeh-leaderboard-table tbody tr:first-child{background:linear-gradient(135deg,#fffdf3,#fff8d9);box-shadow:0 5px 16px rgba(180,130,20,.13);}
-    .tasbeeh-leaderboard-table tbody tr:nth-child(2){background:linear-gradient(135deg,#fff,#f5f6f7);}
-    .tasbeeh-leaderboard-table tbody tr:nth-child(3){background:linear-gradient(135deg,#fff,#fff5ed);}
-    .tasbeeh-rank-medal{font-size:18px;vertical-align:middle;margin-left:2px;}
-    .tasbeeh-status{display:inline-block;padding:4px 7px;border-radius:999px;background:#eaf5ed;color:#166534;font-size:9px;font-weight:900;line-height:1;}
-    .tasbeeh-leaderboard-table tbody tr:first-child .tasbeeh-status{background:#fef3c7;color:#92400e;}
+    /* ===== TASBEEH LEADERBOARD — SAME CARD STYLE AS COMPETITION ===== */
+    .tasbeeh-board-title{color:#a16207;margin:18px 0 9px;font-size:16px;font-weight:900}
+    .tasbeeh-board-cards{display:flex;flex-direction:column;gap:7px;text-align:right}
+    .tasbeeh-user-card{display:grid;grid-template-columns:58px minmax(0,1fr) 72px;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:14px;background:linear-gradient(135deg,#fff,#fafdfb);box-shadow:0 3px 10px rgba(13,59,34,.05);min-height:68px;box-sizing:border-box}
+    .tasbeeh-top-card{border-color:rgba(197,160,89,.55);background:linear-gradient(135deg,#fffdf5,#f8fff9)}
+    .tasbeeh-rank{display:flex;align-items:center;justify-content:center;gap:3px;font-size:17px;font-weight:900;color:#14532d;direction:ltr}
+    .tasbeeh-rank span{font-size:11px;color:#6b7280}
+    .tasbeeh-user-info{min-width:0}
+    .tasbeeh-user-name{font-size:14px;font-weight:900;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tasbeeh-user-label{font-size:9px;color:#6b7280;margin-top:2px}
+    .tasbeeh-score{text-align:center;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:3px 5px;line-height:1.05;color:#92400e}
+    .tasbeeh-score b{display:block;font-size:17px}
+    .tasbeeh-score small{font-size:8px}
+    .tasbeeh-details{grid-column:2 / 4;display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:-1px}
+    .tasbeeh-today{font-size:10px;font-weight:800;color:#166534;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:8px;padding:3px 7px;white-space:nowrap}
+    .tasbeeh-status{font-size:10px;font-weight:800;color:#92400e;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:3px 7px;white-space:nowrap}
+    .tasbeeh-empty{text-align:center;padding:12px;border:1px dashed #d1d5db;border-radius:10px;color:#6b7280}
     @media(max-width:480px){
-      .tasbeeh-leaderboard-table{border-spacing:0 7px;}
-      .tasbeeh-leaderboard-table thead th{font-size:8px;padding:8px 2px;}
-      .tasbeeh-leaderboard-table tbody td{font-size:9px;padding:9px 2px;}
-      .tasbeeh-rank-medal{font-size:16px;}
-      .tasbeeh-status{font-size:8px;padding:4px 5px;}
+      .tasbeeh-user-card{grid-template-columns:52px minmax(0,1fr) 66px;padding:7px 8px;min-height:65px}
+      .tasbeeh-user-name{font-size:13px}
+      .tasbeeh-rank{font-size:16px}
+      .tasbeeh-score b{font-size:16px}
+      .tasbeeh-details{gap:4px}
+      .tasbeeh-today,.tasbeeh-status{font-size:9px;padding:3px 5px}
+      .tasbeeh-board-title{font-size:15px;margin-top:16px}
     }
+
     th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: center; font-size: 13px; }
     th { background-color: var(--primary-color); color: white; font-weight: 600; }
     tr:nth-child(even) { background-color: #f9fafb; }
@@ -1630,11 +1634,8 @@
         </div>
         <div id="statusMsg" class="status-msg" style="color: var(--primary-color);"></div>
 
-        <h3 style="color:var(--primary-color); margin-top: 25px; font-size: 16px; text-align: right;">🏆 لائیو Leaderboard</h3>
-        <table class="tasbeeh-leaderboard-table">
-          <thead><tr><th>🥇 Rank</th><th>👤 User Name</th><th>📿 Total Darood</th><th>📅 Today's Darood</th><th>🏆 Status/Position</th></tr></thead>
-          <tbody id="board"><tr><td colspan="5">لوڈ ہو رہا ہے...</td></tr></tbody>
-        </table>
+        <h3 class="tasbeeh-board-title">🏆 لائیو Leaderboard</h3>
+        <div id="board" class="tasbeeh-board-cards"><div class="tasbeeh-empty">لوڈ ہو رہا ہے...</div></div>
       </div>
 
       <!-- TAB 4: About Tab -->
@@ -3402,16 +3403,21 @@ function switchBottomTab(tabName) {
       loadHomeDailyTop5Winners();
 
       // TASBEEH LEADERBOARD — only Top 5 users.
-      // Ranking/Total = lifetime Tasbeeh count; Today's Darood = today's Tasbeeh dailyCounts.
+      // Same card design language as Competition; data remains Tasbeeh-specific.
       const top5Tasbeeh = userList.slice(0, 5);
       let fullTbody = "";
       top5Tasbeeh.forEach((u, i) => {
         const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
         const todayCount = Number(u.today || 0);
-        const position = i === 0 ? "Top 1" : i === 1 ? "Top 2" : i === 2 ? "Top 3" : `Top ${i + 1}`;
-        fullTbody += `<tr><td><span class="tasbeeh-rank-medal">${medal}</span> #${i + 1}</td><td>${u.name}</td><td><b>${u.count}</b></td><td><b>${todayCount}</b></td><td><span class="tasbeeh-status">${position}</span></td></tr>`;
+        const position = `Top ${i + 1}`;
+        fullTbody += `<div class="tasbeeh-user-card ${i < 3 ? "tasbeeh-top-card" : ""}">
+          <div class="tasbeeh-rank">${medal}<span>#${i + 1}</span></div>
+          <div class="tasbeeh-user-info"><div class="tasbeeh-user-name">${u.name}</div><div class="tasbeeh-user-label">درودِ تسبیح</div></div>
+          <div class="tasbeeh-score"><b>${u.count}</b><small>کل درود</small></div>
+          <div class="tasbeeh-details"><span class="tasbeeh-today">📅 آج: ${todayCount}</span><span class="tasbeeh-status">🏆 ${position}</span></div>
+        </div>`;
       });
-      document.getElementById("board").innerHTML = fullTbody || `<tr><td colspan="5">کوئی ڈیٹا موجود نہیں</td></tr>`;
+      document.getElementById("board").innerHTML = fullTbody || `<div class="tasbeeh-empty">کوئی ڈیٹا موجود نہیں</div>`;
     });
 
     loadLatestWinnerCertificate();
