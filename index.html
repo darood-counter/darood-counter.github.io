@@ -809,7 +809,8 @@
 
     /* ===== COMPACT COMPETITION HEADER / LEADER ===== */
     .comp-topline{display:flex;align-items:center;justify-content:space-between;gap:7px;margin:3px 0 6px;direction:rtl}
-    .comp-section-title{margin:0;color:#d97706;font-size:18px;font-weight:900;line-height:1.2;white-space:nowrap}
+    .comp-section-title{margin:0;color:#d97706;font-size:18px;font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+    .comp-section-title b{color:#14532d}
     .comp-countdown-mini{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;padding:5px 8px;border:1px solid #f0c36b;border-radius:10px;background:linear-gradient(135deg,#fffdf5,#fff7df);color:#92400e;font-size:10px;font-weight:800;line-height:1;box-shadow:0 2px 7px rgba(180,120,20,.08);white-space:nowrap}
     .comp-countdown-mini b{font-size:12px;letter-spacing:.2px}
     .comp-countdown-mini small{font-size:9px;opacity:.7}
@@ -821,7 +822,7 @@
     .comp-leader-arrow{font-size:11px;color:#d97706;flex:0 0 auto}
     @media(max-width:480px){
       .comp-topline{gap:5px;margin:2px 0 5px}
-      .comp-section-title{font-size:16px}
+      .comp-section-title{font-size:13px}
       .comp-countdown-mini{padding:4px 6px;gap:3px;font-size:9px;border-radius:9px}
       .comp-countdown-mini b{font-size:11px}
       .comp-countdown-mini small{font-size:8px}
@@ -1385,22 +1386,13 @@
       <!-- TAB 2: Competition Tab -->
       <div id="compTab" class="hidden">
         <div class="comp-topline">
-          <h2 class="comp-section-title">🎯 مقابلہ</h2>
+          <h2 class="comp-section-title"><span id="compHeaderLeader">آج کے مقابلے میں سب سے آگے — لوڈ ہو رہا ہے...</span></h2>
           <div class="comp-countdown-mini" aria-label="مقابلہ ختم ہونے کا وقت">
             <span>⏳</span>
             <span>ختم ہونے میں</span>
             <b id="compCountdown" dir="ltr">00:00:00</b>
             <small id="compDateDisplay"></small>
           </div>
-        </div>
-
-        <div class="comp-leader-mini" aria-label="آج کے مقابلے میں سب سے آگے صارف">
-          <div class="comp-leader-crown">👑</div>
-          <div class="comp-leader-copy">
-            <span class="comp-leader-label">آج سب سے آگے</span>
-            <span id="compWinnerHighlight" class="comp-leader-value">لوڈ ہو رہا ہے...</span>
-          </div>
-          <div class="comp-leader-arrow">✦</div>
         </div>
 
         <div id="compDaroodSlot"></div>
@@ -3427,14 +3419,16 @@ function switchBottomTab(tabName) {
       }
 
       const topWinner = compList[0];
-      const highlightEl = document.getElementById("compWinnerHighlight");
+      const headerLeaderEl = document.getElementById("compHeaderLeader");
 
-      if (topWinner && topWinner.count > 0) {
-        highlightEl.innerHTML = `<b>${topWinner.name}</b> · ${topWinner.count} درود`;
-        // Latest qualifying winner certificate is handled by loadLatestWinnerCertificate().
-      } else {
-        highlightEl.innerText = "آج کے مقابلے کا آغاز ابھی ہوا ہے!";
+      if (headerLeaderEl) {
+        if (topWinner && Number(topWinner.count || 0) > 0) {
+          headerLeaderEl.innerHTML = `آج کے مقابلے میں سب سے آگے — <b>${topWinner.name}</b> · ${topWinner.count} درود`;
+        } else {
+          headerLeaderEl.innerText = "آج کے مقابلے میں سب سے آگے — ابھی کوئی درود نہیں";
+        }
       }
+      // Latest qualifying winner certificate is handled by loadLatestWinnerCertificate().
     });
 
     document.getElementById("saveProfileBtn").onclick = () => {
