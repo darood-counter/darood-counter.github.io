@@ -591,6 +591,8 @@
     .recent-chats-scroll{max-height:330px;overflow-y:auto;padding-right:2px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .chat-history-clear{border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:8px;padding:5px 8px;font-family:inherit;font-size:10px;font-weight:bold;cursor:pointer}
 .admin-chat-scroll{max-height:360px;overflow-y:auto;padding-right:2px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+    /* Home payment proofs: newest 5 remain visible, older records continue in scroll */
+    #publicProofList{max-height:330px;overflow-y:auto;overflow-x:hidden;padding-right:2px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin}
 .chat-longpress{touch-action:manipulation;-webkit-user-select:none;user-select:none}.admin-recent-room{padding:11px 10px;margin-bottom:7px;border-radius:12px;border:1px solid #e5e7eb;background:#fafafa;cursor:pointer;line-height:1.55}.admin-recent-room:hover{background:#f1f5f9}.admin-recent-name{font-size:13px;font-weight:700;direction:rtl}.admin-recent-preview{font-family:Arial,sans-serif;direction:ltr;text-align:left;font-size:12px;color:var(--text-muted);margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}.chat-bubble>div:not(.chat-meta){font-family:Arial,sans-serif;direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}
 .chat-clear{border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:9px;padding:6px 9px;font-family:inherit;font-size:10px;font-weight:bold;cursor:pointer}
     .chat-delete{border:1px solid #fecaca;background:#fff1f2;color:#dc2626;border-radius:6px;font-size:10px;padding:3px 6px;margin-right:5px;cursor:pointer;font-family:inherit;font-weight:bold;display:inline-block;opacity:1}.chat-delete:hover{background:#fee2e2}
@@ -1246,10 +1248,6 @@
 
 
         <h2 style="font-size:19px; color:var(--primary-color); margin:8px 0;">🕌 آج کی محفل</h2>
-        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:12px; margin:8px 0 12px; box-shadow:0 4px 15px rgba(0,0,0,.03);">
-          <div style="font-size:28px; font-weight:bold; color:var(--primary-color);" id="globalTotalCount">0</div>
-          <div style="font-size:12px; color:var(--text-muted);">آج کے اجتماعی درود (ریئل ٹائم)</div>
-        </div>
 
         <!-- ADMIN PANEL SECTION ON HOME PAGE -->
         <div id="adminPanelSection" class="admin-panel hidden" style="text-align: right; margin-top: 15px;">
@@ -1382,6 +1380,11 @@
           <thead><tr><th>رینک</th><th>صارف</th><th>اسکور</th></tr></thead>
           <tbody id="compBoard"><tr><td colspan="3">لوڈ ہو رہا ہے...</td></tr></tbody>
         </table>
+
+        <h3 style="color:var(--primary-color); margin-top:20px; font-size:16px;">🏆 آخری 5 ونرز</h3>
+        <div id="competitionLast5Winners">
+          <div style="text-align:center; padding:14px;">لوڈ ہو رہا ہے...</div>
+        </div>
       </div>
 
       <!-- TAB CHAT: Messages -->
@@ -1527,7 +1530,9 @@
 
       <!-- TAB 3: Tasbeeh Tab -->
       <div id="rewardTab" class="hidden" style="text-align: center;">
-        <h2 style="font-size: 20px; color: var(--primary-color); margin: 10px 0;">📿 تسبیح کاؤنٹر</h2>
+        <h2 style="font-size: 20px; color: var(--primary-color); margin: 10px 0;">
+          📿 کل اجتماعی درود: <b id="globalTotalCount">0</b>
+        </h2>
         
         <div id="rewardDaroodSlot"></div>
 
@@ -3237,6 +3242,79 @@ function switchBottomTab(tabName) {
       });
     }
 
+    // Competition page: latest 5 qualifying daily winners.
+    // Includes payment status and an optional payment-proof link if the record has one.
+    function loadCompetitionLast5Winners() {
+      const container = document.getElementById("competitionLast5Winners");
+      if (!container) return;
+
+      db.ref("competitions").on("value", snapshot => {
+        const winners = [];
+        snapshot.forEach(daySnap => {
+          const w = getQualifyingDailyWinner(daySnap);
+          if (w) {
+            const val = daySnap.child(w.uid).val() || {};
+            winners.push({
+              ...w,
+              paymentStatus: val.paymentStatus || "",
+              paymentProof: val.paymentProof || val.paymentProofUrl || val.proofUrl || val.paymentProofImage || ""
+            });
+          }
+        });
+
+        winners.sort((a,b) => String(b.dateKey).localeCompare(String(a.dateKey)));
+        const top5 = winners.slice(0,5);
+
+        if (!top5.length) {
+          container.innerHTML = `<div style="text-align:center;padding:14px;">ابھی کوئی 100+ درود والا ونر موجود نہیں</div>`;
+          return;
+        }
+
+        container.innerHTML = top5.map((w,i) => {
+          const medal = i===0 ? "🥇" : i===1 ? "🥈" : i===2 ? "🥉" : "🏆";
+          const isPaid = String(w.paymentStatus).toLowerCase() === "paid";
+          const badge = isPaid
+            ? `<span class="paid-badge">پیمنٹ بھیج دی گئی ✓</span>`
+            : `<span class="pending-badge">پیمنٹ زیرِ عمل</span>`;
+
+          const proof = isPaid && w.paymentProof
+            ? `<div style="margin-top:7px;text-align:left;">
+                 <a href="${String(w.paymentProof).replace(/"/g,'&quot;')}" target="_blank" rel="noopener"
+                    style="display:inline-block;background:#0d3b22;color:#fff;text-decoration:none;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:bold;">
+                    📎 پیمنٹ پروف دیکھیں
+                 </a>
+               </div>`
+            : "";
+
+          const cert = isPaid
+            ? `<div style="margin-top:7px;text-align:left;">
+                 <button onclick="downloadSpecificCertificate('${String(w.name||"Winner").replace(/'/g,"\\'")}', ${Number(w.count||0)}, '${String(w.dateKey).replace(/'/g,"\\'")}')"
+                   style="background:linear-gradient(135deg,#0d3b22,#166534);color:#fff;border:0;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:bold;cursor:pointer;font-family:inherit;">
+                   📜 سرٹیفکیٹ ڈاؤنلوڈ
+                 </button>
+               </div>`
+            : "";
+
+          return `<div class="proof-item" style="text-align:right;background:#fffdf9;border:1px solid #ead9b0;border-radius:14px;padding:12px;margin:9px 0;box-shadow:0 3px 10px rgba(0,0,0,.05);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+              <div style="font-size:19px;">${medal}</div>
+              <div style="flex:1;text-align:right;">
+                <div style="font-weight:bold;color:var(--primary-color);">${w.name}</div>
+                <div style="font-size:11px;color:var(--text-muted);">📅 ${w.dateKey}</div>
+              </div>
+              <div style="text-align:center;min-width:62px;">
+                <div style="font-weight:bold;">${Number(w.count||0)}</div>
+                <div style="font-size:10px;color:var(--text-muted);">درود</div>
+              </div>
+            </div>
+            <div style="margin-top:7px;text-align:center;">${badge}</div>
+            ${proof}
+            ${cert}
+          </div>`;
+        }).join("");
+      });
+    }
+
     db.ref("users").on("value", snapshot => {
       let total = 0;
       let userList = [];
@@ -3272,6 +3350,7 @@ function switchBottomTab(tabName) {
 
     loadLatestWinnerCertificate();
     loadHomeDailyTop5Winners();
+    loadCompetitionLast5Winners();
 
     db.ref("competitions/" + todayDateKey).on("value", snapshot => {
       let compList = [];
