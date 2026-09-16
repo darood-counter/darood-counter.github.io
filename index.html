@@ -2444,14 +2444,6 @@ function switchBottomTab(tabName) {
         document.getElementById("rewardTab").classList.remove("hidden");
         document.getElementById("navTasbeeh").classList.add("active");
         document.getElementById("daroodCard").classList.remove("hidden");
-        if (!tasbeehListeningActive && !tasbeehSilentModeActive) {
-           setTimeout(() => {
-             if (document.getElementById('rewardTab') && !document.getElementById('rewardTab').classList.contains('hidden')) {
-               showTasbeehVoiceStartNotice();
-               startVoiceRecognition('countBtn', 'statusMsg', false);
-             }
-           }, 120);
-         }
       } else if (tabName === 'profile') {
         document.getElementById("profileTab").classList.remove("hidden");
         document.getElementById("navProfile").classList.add("active");
@@ -3986,9 +3978,11 @@ function switchBottomTab(tabName) {
     }
 
     function startTasbeehVoiceFromUser() {
-      hideTasbeehVoiceStartNotice();
+      // Popup only appears after the user presses Start.
+      // Keep the existing popup design/position and all other Tasbeeh logic unchanged.
       hideTasbeehSilentUI();
       resetDaroodWordHighlight();
+      showTasbeehVoiceStartNotice();
       startVoiceRecognition('countBtn', 'statusMsg', false);
     }
 
