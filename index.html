@@ -976,7 +976,7 @@
 
     /* ===== TASBEEH VOICE START NOTICE ===== */
     #tasbeehVoiceStartNotice{
-      position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100003;
+      position:fixed;top:calc(var(--tasbeeh-popup-top, 76px));left:50%;transform:translateX(-50%);z-index:100003;
       width:min(390px,calc(100% - 28px));box-sizing:border-box;
       background:#fff;border:2px solid var(--accent-gold);border-radius:18px;
       padding:13px 15px;box-shadow:0 12px 35px rgba(0,0,0,.22);
@@ -994,7 +994,7 @@
 
     /* ===== TASBEEH SILENT READING MODE ===== */
     #tasbeehSilentNotice{
-      position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100001;
+      position:fixed;top:calc(var(--tasbeeh-popup-top, 76px));left:50%;transform:translateX(-50%);z-index:100001;
       width:min(360px,calc(100% - 28px));box-sizing:border-box;
       background:#fffdf7;border:1.5px solid var(--accent-gold);border-radius:16px;
       padding:11px 14px;box-shadow:0 10px 30px rgba(0,0,0,.18);text-align:center;
@@ -1004,7 +1004,7 @@
     #tasbeehSilentNotice .silent-count{font-size:13px;color:#a16207;font-weight:800;margin-top:2px}
     #tasbeehSilentNotice .silent-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
     #tasbeehQuestionPopup{
-      position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100002;
+      position:fixed;top:calc(var(--tasbeeh-popup-top, 76px));left:50%;transform:translateX(-50%);z-index:100002;
       width:min(390px,calc(100% - 28px));box-sizing:border-box;
       background:#fff;border:2px solid var(--accent-gold);border-radius:18px;
       padding:14px;box-shadow:0 12px 35px rgba(0,0,0,.22);text-align:center;
@@ -1015,7 +1015,7 @@
     .tasbeeh-question-actions button{flex:1;border:0;border-radius:11px;padding:9px 10px;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer}
     #tasbeehYesBtn{background:#15803d;color:#fff}
     #tasbeehNoBtn{background:#fef3c7;color:#92400e;border:1px solid #f59e0b!important}
-    @keyframes tasbeehNoticeIn{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:1;transform:translate(-50%,-50%)}}
+    @keyframes tasbeehNoticeIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
     /* ===== PUBLIC CONTENT / ADSENSE READINESS ===== */
     .public-content{background:#fffdf7;border:1px solid #e7d7a7;border-radius:16px;padding:16px;margin:0 0 14px;box-shadow:0 4px 14px rgba(13,59,34,.05);text-align:right}
