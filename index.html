@@ -3421,9 +3421,54 @@ function switchBottomTab(tabName) {
       const topWinner = compList[0];
       const headerLeaderEl = document.getElementById("compHeaderLeader");
 
+      // Leader ka naam Urdu mein dikhane ke liye (common names + Roman Urdu fallback)
+      function romanToUrduName(name) {
+        const original = String(name || "صارف").trim();
+        if (!original) return "صارف";
+        if (/[\u0600-\u06FF]/.test(original)) return original;
+        const common = {
+          "muhammad":"محمد", "mohammad":"محمد", "mohammed":"محمد",
+          "ahmad":"احمد", "ahmed":"احمد", "ali":"علی", "umar":"عمر", "omar":"عمر",
+          "usman":"عثمان", "uthman":"عثمان", "osman":"عثمان", "abdullah":"عبداللہ",
+          "abdul rehman":"عبدالرحمن", "abdur rehman":"عبدالرحمن", "rehman":"رحمان",
+          "rahman":"رحمان", "hassan":"حسن", "hasan":"حسن", "hussain":"حسین", "husain":"حسین",
+          "bilal":"بلال", "hamza":"حمزہ", "zain":"زین", "zainab":"زینب", "fatima":"فاطمہ",
+          "aisha":"عائشہ", "ayesha":"عائشہ", "maryam":"مریم", "mariam":"مریم",
+          "sana":"ثناء", "sadia":"سعدیہ", "amna":"آمنہ", "hafsa":"حفصہ", "iqra":"اقرا",
+          "usama":"اسامہ", "osama":"اسامہ", "saad":"سعد", "talha":"طلحہ", "yasir":"یاسر",
+          "yasir":"یاسر", "imran":"عمران", "irfan":"عرفان", "farhan":"فرحان", "faisal":"فیصل",
+          "kashif":"کاشف", "arsalan":"ارسلان", "salman":"سلمان", "sohail":"سہیل",
+          "shahid":"شاہد", "rashid":"راشد", "naveed":"نوید", "javed":"جاوید", "kamran":"کامران",
+          "tariq":"طارق", "atif":"عاطف", "adnan":"عدنان", "danish":"دانش", "waqas":"وقاص",
+          "aqib":"عاقب", "aqeel":"عقیل", "azeem":"عظیم", "zubair":"زبیر", "zubair":"زبیر",
+          "farooq":"فاروق", "qasim":"قاسم", "shoaib":"شعیب", "noman":"نعمان", "nouman":"نعمان",
+          "mustafa":"مصطفیٰ", "musa":"موسیٰ", "isa":"عیسیٰ", "ibrahim":"ابراہیم", "yusuf":"یوسف",
+          "yaqub":"یعقوب", "ismail":"اسماعیل", "usman":"عثمان", "raza":"رضا", "rizwan":"رضوان",
+          "saima":"صائمہ", "hina":"حنا", "hira":"حرا", "mahnoor":"ماہ نور", "noor":"نور",
+          "saira":"سائرہ", "komal":"کومل", "kiran":"کرن", "madiha":"مدیحہ", "rabia":"رابعہ"
+        };
+        const words = original.toLowerCase().replace(/[_-]+/g,' ').split(/\s+/).filter(Boolean);
+        const converted = words.map(w => common[w] || romanWordToUrdu(w));
+        return converted.join(' ') || original;
+      }
+
+      function romanWordToUrdu(word) {
+        let w = word.toLowerCase();
+        const chunks = [
+          [/kh/g,'خ'],[/gh/g,'غ'],[/sh/g,'ش'],[/ch/g,'چ'],[/ph/g,'ف'],[/th/g,'ث'],[/dh/g,'د'],
+          [/aa/g,'ا'],[/ee/g,'ی'],[/ii/g,'ی'],[/oo/g,'و'],[/ou/g,'و'],[/au/g,'و'],
+          [/bh/g,'بھ'],[/ch/g,'چ'],[/jh/g,'جھ'],[/kh/g,'خ'],[/gh/g,'غ'],[/ph/g,'ف'],[/rh/g,'ڑھ'],
+          [/b/g,'ب'],[/p/g,'پ'],[/t/g,'ت'],[/j/g,'ج'],[/d/g,'د'],[/r/g,'ر'],[/s/g,'س'],[/z/g,'ز'],
+          [/f/g,'ف'],[/q/g,'ق'],[/k/g,'ک'],[/g/g,'گ'],[/l/g,'ل'],[/m/g,'م'],[/n/g,'ن'],[/h/g,'ہ'],
+          [/v/g,'و'],[/w/g,'و'],[/x/g,'کس'],[/y/g,'ی'],[/c/g,'ک'],[/a/g,'ا'],[/e/g,'ی'],[/i/g,'ی'],[/o/g,'و'],[/u/g,'و']
+        ];
+        chunks.forEach(([re,ch]) => w = w.replace(re,ch));
+        return w || word;
+      }
+
       if (headerLeaderEl) {
         if (topWinner && Number(topWinner.count || 0) > 0) {
-          headerLeaderEl.innerHTML = `<b>${topWinner.name}</b> · ${topWinner.count} درود`;
+          headerLeaderEl.innerHTML = `<b>${romanToUrduName(topWinner.name)}</b> · ${topWinner.count} درود`;
         } else {
           headerLeaderEl.innerText = "ابھی کوئی درود نہیں";
         }
