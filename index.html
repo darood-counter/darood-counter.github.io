@@ -790,21 +790,28 @@
       text-align: center;
     }
   
-    /* ===== ALL COMPETITION PARTICIPANTS CARDS ===== */
+    /* ===== TOP 5 TASBEEH COMPETITION LEADERBOARD ===== */
     .competition-board-title{color:#a16207;margin:18px 0 9px;font-size:16px;font-weight:900}
+    .competition-live-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+    .competition-live-title{font-size:12px;font-weight:900;color:#14532d}
+    .competition-live-dot{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:900;color:#dc2626}
+    .competition-live-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.12);animation:competitionLivePulse 1.4s infinite}
+    @keyframes competitionLivePulse{0%,100%{opacity:1}50%{opacity:.45}}
     .competition-board-cards{display:flex;flex-direction:column;gap:7px;text-align:right}
-    .competition-user-card{display:grid;grid-template-columns:58px minmax(0,1fr) 72px;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:14px;background:linear-gradient(135deg,#fff,#fafdfb);box-shadow:0 3px 10px rgba(13,59,34,.05);min-height:54px;box-sizing:border-box}
+    .competition-user-card{display:grid;grid-template-columns:56px minmax(0,1fr) 82px 82px;align-items:center;gap:7px;padding:8px 9px;border:1px solid #e5e7eb;border-radius:14px;background:linear-gradient(135deg,#fff,#fafdfb);box-shadow:0 3px 10px rgba(13,59,34,.05);min-height:60px;box-sizing:border-box}
     .competition-top-card{border-color:rgba(197,160,89,.55);background:linear-gradient(135deg,#fffdf5,#f8fff9)}
-    .competition-rank{display:flex;align-items:center;justify-content:center;gap:3px;font-size:17px;font-weight:900;color:#14532d;direction:ltr}
+    .competition-rank{display:flex;align-items:center;justify-content:center;gap:3px;font-size:20px;font-weight:900;color:#14532d;direction:ltr}
     .competition-rank span{font-size:11px;color:#6b7280}
     .competition-user-info{min-width:0}
     .competition-user-name{font-size:14px;font-weight:900;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .competition-user-label{font-size:9px;color:#6b7280;margin-top:1px}
-    .competition-score{text-align:center;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:3px 5px;line-height:1.05;color:#92400e}
-    .competition-score b{display:block;font-size:17px}
-    .competition-score small{font-size:8px}
+    .competition-stat{min-width:0;text-align:center;border-radius:10px;padding:5px 4px;line-height:1.05}
+    .competition-stat b{display:block;font-size:15px}
+    .competition-stat small{font-size:8px;white-space:nowrap}
+    .competition-total{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+    .competition-today{background:#fef3c7;border:1px solid #fde68a;color:#92400e}
     .competition-empty{text-align:center;padding:12px;border:1px dashed #d1d5db;border-radius:12px;color:#6b7280;font-size:12px;background:#fafafa}
-    @media(max-width:480px){.competition-user-card{grid-template-columns:52px minmax(0,1fr) 66px;padding:7px 8px;min-height:51px}.competition-user-name{font-size:13px}.competition-rank{font-size:16px}.competition-score b{font-size:16px}.competition-board-title{font-size:15px;margin-top:16px}}
+    @media(max-width:480px){.competition-user-card{grid-template-columns:48px minmax(0,1fr) 64px 64px;padding:7px 7px;min-height:56px;gap:5px}.competition-user-name{font-size:12px}.competition-rank{font-size:17px}.competition-rank span{font-size:10px}.competition-stat{padding:4px 2px}.competition-stat b{font-size:14px}.competition-stat small{font-size:7px}.competition-board-title{font-size:15px;margin-top:16px}}
 
 
     /* ===== COMPACT COMPETITION HEADER / LEADER ===== */
@@ -3390,22 +3397,39 @@ function switchBottomTab(tabName) {
     db.ref("competitions/" + todayDateKey).on("value", snapshot => {
       let compList = [];
       snapshot.forEach(child => {
-        const val = child.val();
-        compList.push({ uid: child.key, name: val.name || "صارف", count: val.count || 0 });
+        const val = child.val() || {};
+        compList.push({ uid: child.key, name: val.name || "صارف", count: Number(val.count || 0) });
       });
 
+      // Competition ranking remains based on today's Darood.
       compList.sort((a, b) => b.count - a.count);
+      const top5 = compList.slice(0, 5);
 
-      let compCards = "";
-      compList.forEach((u, i) => {
-        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
-        compCards += `<div class="competition-user-card ${i < 3 ? "competition-top-card" : ""}">
-          <div class="competition-rank">${medal}<span>#${i + 1}</span></div>
-          <div class="competition-user-info"><div class="competition-user-name">${u.name}</div><div class="competition-user-label">مقابلے کا اسکور</div></div>
-          <div class="competition-score"><b>${u.count}</b><small>درود</small></div>
-        </div>`;
+      // Fetch lifetime totals from the existing users/{uid}/count data.
+      db.ref("users").once("value").then(usersSnap => {
+        const usersData = usersSnap.val() || {};
+        let compCards = `<div class="competition-live-head"><div class="competition-live-title">🏆 Top 5 Competition</div><div class="competition-live-dot">LIVE</div></div>`;
+        top5.forEach((u, i) => {
+          const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
+          const total = Number((usersData[u.uid] || {}).count || 0);
+          compCards += `<div class="competition-user-card ${i < 3 ? "competition-top-card" : ""}">
+            <div class="competition-rank">${medal}<span>#${i + 1}</span></div>
+            <div class="competition-user-info"><div class="competition-user-name">${u.name}</div><div class="competition-user-label">👤 User Name</div></div>
+            <div class="competition-stat competition-total"><b>${total}</b><small>📿 Total Darood</small></div>
+            <div class="competition-stat competition-today"><b>${u.count}</b><small>📅 Today's Darood</small></div>
+          </div>`;
+        });
+        if (!top5.length) compCards = `<div class="competition-empty">آج کوئی مقابلہ نہیں ہوا</div>`;
+        document.getElementById("compBoard").innerHTML = compCards;
+      }).catch(() => {
+        // Keep the leaderboard visible even if lifetime totals cannot be read.
+        let compCards = `<div class="competition-live-head"><div class="competition-live-title">🏆 Top 5 Competition</div><div class="competition-live-dot">LIVE</div></div>`;
+        top5.forEach((u, i) => {
+          const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
+          compCards += `<div class="competition-user-card ${i < 3 ? "competition-top-card" : ""}"><div class="competition-rank">${medal}<span>#${i + 1}</span></div><div class="competition-user-info"><div class="competition-user-name">${u.name}</div><div class="competition-user-label">👤 User Name</div></div><div class="competition-stat competition-total"><b>-</b><small>📿 Total Darood</small></div><div class="competition-stat competition-today"><b>${u.count}</b><small>📅 Today's Darood</small></div></div>`;
+        });
+        document.getElementById("compBoard").innerHTML = compCards || `<div class="competition-empty">آج کوئی مقابلہ نہیں ہوا</div>`;
       });
-      document.getElementById("compBoard").innerHTML = compCards || `<div class="competition-empty">آج کوئی مقابلہ نہیں ہوا</div>`;
 
       if (currentUser) {
         const myIndex = compList.findIndex(u => u.uid === currentUser.uid);
