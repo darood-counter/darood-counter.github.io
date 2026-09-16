@@ -92,7 +92,7 @@
       border-radius:50%;
       background:rgba(197,160,89,.16);
       color:#f8d77a;
-      font-size:16px;
+      font-size:12px;
       line-height:1;
       display:inline-flex;
       align-items:center;
@@ -1386,7 +1386,7 @@
       <!-- TAB 2: Competition Tab -->
       <div id="compTab" class="hidden">
         <div class="comp-topline">
-          <h2 class="comp-section-title"><span id="compHeaderLeader">آج کے مقابلے میں سب سے آگے — لوڈ ہو رہا ہے...</span></h2>
+          <h2 class="comp-section-title"><span id="compHeaderLeader">آج سب سے آگے: لوڈ ہو رہا ہے...</span></h2>
           <div class="comp-countdown-mini" aria-label="مقابلہ ختم ہونے کا وقت">
             <span>⏳</span>
             <span>ختم ہونے میں</span>
@@ -3423,9 +3423,9 @@ function switchBottomTab(tabName) {
 
       if (headerLeaderEl) {
         if (topWinner && Number(topWinner.count || 0) > 0) {
-          headerLeaderEl.innerHTML = `آج کے مقابلے میں سب سے آگے — <b>${topWinner.name}</b> · ${topWinner.count} درود`;
+          headerLeaderEl.innerHTML = `آج سب سے آگے: <b>${topWinner.name}</b> · ${topWinner.count} درود`;
         } else {
-          headerLeaderEl.innerText = "آج کے مقابلے میں سب سے آگے — ابھی کوئی درود نہیں";
+          headerLeaderEl.innerText = "آج سب سے آگے: ابھی کوئی درود نہیں";
         }
       }
       // Latest qualifying winner certificate is handled by loadLatestWinnerCertificate().
