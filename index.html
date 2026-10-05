@@ -4461,6 +4461,43 @@ function switchBottomTab(tabName) {
       // the earlier segment available when the next segment arrives.
       let tasbeehCumulativeSpeech = '';
 
+      // Backup Tasbeeh shortcut: if the speech engine gets stuck on one of the
+      // individual 34 words, the following three phrases can still complete the
+      // same Darood in the required order. They are checked across recognition
+      // segments, so a short pause/breath between phrases is fine.
+      let tasbeehShortcutStage = 0;
+      let tasbeehShortcutCursor = 0;
+      const TASBEEH_SHORTCUT_PHRASES = [
+        ["اللهم صل على محمد", "اللهم صلي على محمد", "اللهم صل علي محمد"],
+        ["اللهم بارك", "اللهم بارک"],
+        ["إنك", "انك", "انک"]
+      ];
+
+      function checkTasbeehShortcutSequence(spokenText) {
+        if (!spokenText || tasbeehShortcutStage >= TASBEEH_SHORTCUT_PHRASES.length) return false;
+        const compactSpeech = normalizeArabicGlobal(spokenText).replace(/\s+/g, "");
+        if (!compactSpeech) return false;
+
+        while (tasbeehShortcutStage < TASBEEH_SHORTCUT_PHRASES.length) {
+          const variants = TASBEEH_SHORTCUT_PHRASES[tasbeehShortcutStage]
+            .map(v => normalizeArabicGlobal(v).replace(/\s+/g, ""))
+            .filter(Boolean);
+          let foundAt = -1;
+          let foundEnd = -1;
+          for (const phrase of variants) {
+            const at = compactSpeech.indexOf(phrase, tasbeehShortcutCursor);
+            if (at !== -1 && (foundAt === -1 || at < foundAt)) {
+              foundAt = at;
+              foundEnd = at + phrase.length;
+            }
+          }
+          if (foundAt === -1) return false;
+          tasbeehShortcutCursor = foundEnd;
+          tasbeehShortcutStage++;
+        }
+        return true;
+      }
+
       const normalizeArabic = (value) => {
         return (value || "")
           .normalize("NFKC")
@@ -4702,11 +4739,19 @@ function switchBottomTab(tabName) {
             if (!isComp) {
               tasbeehCumulativeSpeech = (tasbeehCumulativeSpeech + ' ' + bestTranscript).trim();
               updateDaroodWordHighlight(tasbeehCumulativeSpeech);
+
+              // Backup completion path: keep the existing word-by-word system
+              // untouched, but if these three phrases are heard in sequence,
+              // complete the same round and let the existing +1/save flow run.
+              if (checkTasbeehShortcutSequence(tasbeehCumulativeSpeech)) {
+                document.querySelectorAll('#daroodArabicText .darood-word').forEach(el => el.classList.add('read'));
+              }
             }
           }
 
-          // IMPORTANT: Tasbeeh +1 is triggered only after ALL displayed words
-          // are green. The old three-word trigger cannot finish Tasbeeh early.
+          // IMPORTANT: Tasbeeh +1 is triggered after ALL displayed words are
+          // green. This can happen either through the normal 34-word matcher
+          // or the three-phrase backup sequence above.
           if (!isComp && maybeFinishOnCompleteDarood()) {
             return;
           }
