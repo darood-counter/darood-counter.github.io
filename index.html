@@ -824,6 +824,8 @@
     .competition-off-icon{font-size:42px;margin-bottom:8px}
     .competition-off-title{font-size:20px;font-weight:900;color:#14532d;margin-bottom:7px}
     .competition-off-text{font-size:13px;color:#64748b;line-height:1.8}
+.competition-off-btn{margin-top:16px;min-width:110px;padding:10px 24px;border:0;border-radius:10px;background:linear-gradient(135deg,#14532d,#0d3b22);color:#fff;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 4px 10px rgba(13,59,34,.18)}
+.competition-off-btn:active{transform:scale(.98)}
     .competition-board-title{color:#a16207;margin:18px 0 9px;font-size:16px;font-weight:900}
     .competition-board-cards{display:flex;flex-direction:column;gap:7px;text-align:right}
     .competition-user-card{display:grid;grid-template-columns:58px minmax(0,1fr) 72px;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:14px;background:linear-gradient(135deg,#fff,#fafdfb);box-shadow:0 3px 10px rgba(13,59,34,.05);min-height:54px;box-sizing:border-box}
@@ -1436,6 +1438,7 @@
           <div class="competition-off-icon">🏆</div>
           <div class="competition-off-title">ابھی کوئی مقابلہ نہیں ہے</div>
           <div class="competition-off-text">نیا مقابلہ جلد شروع ہوگا۔<br>تب تک آپ تسبیح والے صفحے پر درود شریف پڑھ سکتے ہیں۔</div>
+          <button type="button" class="competition-off-btn" onclick="goToTasbeehFromCompetitionOff()">OK</button>
         </div>
         <div id="competitionLiveContent">
         <div class="comp-topline">
@@ -2045,10 +2048,20 @@
       const next = !!enabled;
       const status = document.getElementById("adminCompetitionStatus");
       if (status) status.innerText = next ? "مقابلہ ON کیا جا رہا ہے..." : "مقابلہ OFF کیا جا رہا ہے...";
-      db.ref("siteSettings/competitionsEnabled").set(next).catch(() => {
+      db.ref("siteSettings/competitionsEnabled").set(next).then(() => {
+        renderCompetitionAvailability(next);
+      }).catch(() => {
         renderCompetitionAvailability(competitionsEnabled);
         if (status) { status.innerText = "سیٹنگ محفوظ نہیں ہو سکی۔"; status.style.color = "#dc2626"; }
       });
+    }
+
+    function goToTasbeehFromCompetitionOff() {
+      competitionUnavailableNoticeOpen = false;
+      const modal = document.getElementById("customModal");
+      if (modal) modal.classList.add("hidden");
+      restoreCompetitionModal();
+      switchBottomTab('reward');
     }
 
     function showCompetitionUnavailableNotice() {
@@ -2604,7 +2617,9 @@ function switchBottomTab(tabName) {
           const compSlot = document.getElementById("compDaroodSlot");
           if (compSlot) compSlot.innerHTML = "";
           document.getElementById("daroodCard").classList.add("hidden");
-          showCompetitionUnavailableNotice();
+          const modal = document.getElementById("customModal");
+          if (modal) modal.classList.add("hidden");
+          competitionUnavailableNoticeOpen = false;
           return;
         }
         document.getElementById("customModal").classList.remove("hidden");
@@ -2800,11 +2815,12 @@ function switchBottomTab(tabName) {
       return { userList, globalTotal };
     }
 
-    loadCompetitionAvailability();
-
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
+        // Start the competition availability listener only after Firebase auth is ready.
+        // This prevents the initial unauthenticated read from getting stuck on permission-denied.
+        loadCompetitionAvailability();
         document.getElementById("authSection").classList.add("hidden");
         document.getElementById("userInfo").classList.remove("hidden");
         document.getElementById("headerUserArea").classList.remove("hidden");
