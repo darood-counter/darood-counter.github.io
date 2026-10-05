@@ -2001,11 +2001,21 @@
     let todayDateKey = getLocalDateKey();
     let currentAdminFilter = "today";
     let competitionsEnabled = true;
+    let competitionAvailabilityReady = false;
     let competitionAvailabilityListener = null;
+    // Remember the last known state so an OFF competition page does not briefly
+    // show the normal competition popup while Firebase is loading after refresh.
+    try {
+      const cachedCompetitionState = localStorage.getItem('competitions_enabled_cache');
+      if (cachedCompetitionState === 'false') competitionsEnabled = false;
+      if (cachedCompetitionState === 'true') competitionsEnabled = true;
+    } catch(e) {}
     let competitionUnavailableNoticeOpen = false;
 
     function renderCompetitionAvailability(enabled) {
       competitionsEnabled = enabled !== false;
+      competitionAvailabilityReady = true;
+      try { localStorage.setItem('competitions_enabled_cache', competitionsEnabled ? 'true' : 'false'); } catch(e) {}
       const live = document.getElementById("competitionLiveContent");
       const off = document.getElementById("competitionOffCard");
       if (live) live.classList.toggle("hidden", !competitionsEnabled);
@@ -2027,6 +2037,10 @@
         status.style.color = competitionsEnabled ? "#15803d" : "#b45309";
       }
     }
+
+    // Apply the cached state immediately so refresh never flashes the normal
+    // competition dialog when the last known state was OFF.
+    renderCompetitionAvailability(competitionsEnabled);
 
     function loadCompetitionAvailability() {
       if (competitionAvailabilityListener) competitionAvailabilityListener();
@@ -2611,9 +2625,12 @@ function switchBottomTab(tabName) {
         document.getElementById("mainTab").classList.remove("hidden");
         document.getElementById("navHome").classList.add("active");
       } else if (tabName === 'competition') {
-        if (!competitionsEnabled) {
-          document.getElementById("compTab").classList.remove("hidden");
-          document.getElementById("navCompetition").classList.add("active");
+        document.getElementById("compTab").classList.remove("hidden");
+        document.getElementById("navCompetition").classList.add("active");
+
+        // On refresh Firebase may still be loading. Do NOT open the normal
+        // "مقابلہ جاری ہے" popup before the real ON/OFF state is known.
+        if (!competitionAvailabilityReady) {
           const compSlot = document.getElementById("compDaroodSlot");
           if (compSlot) compSlot.innerHTML = "";
           document.getElementById("daroodCard").classList.add("hidden");
@@ -2622,10 +2639,18 @@ function switchBottomTab(tabName) {
           competitionUnavailableNoticeOpen = false;
           return;
         }
+
+        if (!competitionsEnabled) {
+          const compSlot = document.getElementById("compDaroodSlot");
+          if (compSlot) compSlot.innerHTML = "";
+          document.getElementById("daroodCard").classList.add("hidden");
+          const modal = document.getElementById("customModal");
+          if (modal) modal.classList.add("hidden");
+          competitionUnavailableNoticeOpen = false;
+          return;
+        }
+
         document.getElementById("customModal").classList.remove("hidden");
-        document.getElementById("compTab").classList.remove("hidden");
-        document.getElementById("navCompetition").classList.add("active");
-        
         const compSlot = document.getElementById("compDaroodSlot");
         if (compSlot) compSlot.appendChild(document.getElementById("daroodCard"));
         document.getElementById("daroodCard").classList.remove("hidden");
