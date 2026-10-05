@@ -4468,9 +4468,9 @@ function switchBottomTab(tabName) {
       let tasbeehShortcutStage = 0;
       let tasbeehShortcutCursor = 0;
       const TASBEEH_SHORTCUT_PHRASES = [
-        ["اللهم صل على محمد", "اللهم صلي على محمد", "اللهم صل علي محمد"],
-        ["اللهم بارك", "اللهم بارک"],
-        ["إنك", "انك", "انک"]
+        ["اللهم صل على محمد", "اللهم صلي على محمد", "اللهم صل علي محمد", "اللهم صلى على محمد", "اللهم صل علی محمد"],
+        ["اللهم بارك", "اللهم بارک", "اللهم باركا", "اللهم بارکَ"],
+        ["إنك", "انك", "انک", "إنک", "انكَ"]
       ];
 
       function checkTasbeehShortcutSequence(spokenText) {
@@ -4491,6 +4491,35 @@ function switchBottomTab(tabName) {
               foundEnd = at + phrase.length;
             }
           }
+
+          // Small fuzzy fallback for SpeechRecognition variations. This is
+          // deliberately limited to the three shortcut phrases and never
+          // changes the normal 34-word green matcher.
+          if (foundAt === -1) {
+            const target = variants[0] || "";
+            const maxStart = Math.min(compactSpeech.length, tasbeehShortcutCursor + 18);
+            const distance = (a,b) => {
+              const A=Array.from(a), B=Array.from(b);
+              let prev=Array.from({length:B.length+1},(_,i)=>i);
+              for(let i=1;i<=A.length;i++){
+                const cur=[i];
+                for(let j=1;j<=B.length;j++) cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(A[i-1]===B[j-1]?0:1));
+                prev=cur;
+              }
+              return prev[B.length];
+            };
+            let bestD=Infinity, bestAt=-1, bestLen=0;
+            for(let at=tasbeehShortcutCursor; at<maxStart; at++){
+              for(let len=Math.max(2,target.length-2); len<=Math.min(compactSpeech.length-at,target.length+3); len++){
+                const piece=compactSpeech.slice(at,at+len);
+                const d=distance(piece,target);
+                const limit=target.length<=3 ? 1 : Math.max(1,Math.ceil(target.length*0.28));
+                if(d<=limit && d<bestD){ bestD=d; bestAt=at; bestLen=len; }
+              }
+            }
+            if(bestAt!==-1){ foundAt=bestAt; foundEnd=bestAt+bestLen; }
+          }
+
           if (foundAt === -1) return false;
           tasbeehShortcutCursor = foundEnd;
           tasbeehShortcutStage++;
@@ -4737,13 +4766,27 @@ function switchBottomTab(tabName) {
           if (bestTranscript) {
             collectedSpeech.push(bestTranscript);
             if (!isComp) {
+              // Check ALL recognition alternatives as a backup. Sometimes
+              // Chrome/SpeechRecognition puts the useful phrase in result[1]
+              // or result[2] even though result[0] is slightly wrong.
+              let shortcutCompleted = false;
+              for (let j = 0; j < result.length; j++) {
+                const candidate = result[j]?.transcript || "";
+                if (!candidate) continue;
+                const candidateCumulative = (tasbeehCumulativeSpeech + ' ' + candidate).trim();
+                if (checkTasbeehShortcutSequence(candidateCumulative)) {
+                  shortcutCompleted = true;
+                  break;
+                }
+              }
+
               tasbeehCumulativeSpeech = (tasbeehCumulativeSpeech + ' ' + bestTranscript).trim();
               updateDaroodWordHighlight(tasbeehCumulativeSpeech);
 
-              // Backup completion path: keep the existing word-by-word system
-              // untouched, but if these three phrases are heard in sequence,
-              // complete the same round and let the existing +1/save flow run.
-              if (checkTasbeehShortcutSequence(tasbeehCumulativeSpeech)) {
+              // Backup completion path: the normal 34-word matcher remains
+              // untouched. If the three shortcut phrases were recognized in
+              // order, mark all words green and use the same existing +1 flow.
+              if (shortcutCompleted || checkTasbeehShortcutSequence(tasbeehCumulativeSpeech)) {
                 document.querySelectorAll('#daroodArabicText .darood-word').forEach(el => el.classList.add('read'));
               }
             }
