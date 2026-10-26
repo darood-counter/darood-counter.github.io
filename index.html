@@ -2899,13 +2899,20 @@ function switchBottomTab(tabName) {
           document.getElementById("compUserTotal").innerText = data ? (data.count || 0) : 0;
         });
 
+        // Reliable Firebase presence: register the disconnect cleanup first,
+        // then mark this UID online. Repeat this sequence after every reconnect.
         const userStatusRef = db.ref("status/" + user.uid);
-        db.ref(".info/connected").on("value", snapshot => {
+        const connectedRef = db.ref(".info/connected");
+        connectedRef.off("value", window.__mehfilPresenceHandler || undefined);
+        const presenceHandler = snapshot => {
           if (snapshot.val() === true) {
-            userStatusRef.onDisconnect().remove();
-            userStatusRef.set(true);
+            userStatusRef.onDisconnect().remove()
+              .then(() => userStatusRef.set(true))
+              .catch(err => console.error("Presence setup failed:", err));
           }
-        });
+        };
+        window.__mehfilPresenceHandler = presenceHandler;
+        connectedRef.on("value", presenceHandler);
         initChatSystem();
 
         // Restore the page/tab that was open before refresh. Tasbeeh will also
@@ -2920,7 +2927,11 @@ function switchBottomTab(tabName) {
           }
         }, 150);
       } else {
-        if (currentUser) db.ref("status/" + currentUser.uid).remove();
+        if (currentUser) {
+          db.ref("status/" + currentUser.uid).remove().catch(err => {
+            console.error("Presence cleanup on logout failed:", err);
+          });
+        }
         currentUser = null;
         document.getElementById("authSection").classList.remove("hidden");
         document.getElementById("userInfo").classList.add("hidden");
