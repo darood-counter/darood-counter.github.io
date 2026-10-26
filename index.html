@@ -2755,7 +2755,23 @@ function switchBottomTab(tabName) {
 
     document.getElementById("googleSignupBtn").onclick = handleGoogleAuth;
     document.getElementById("googleLoginBtn").onclick = handleGoogleAuth;
-    document.getElementById("logoutBtn").onclick = () => auth.signOut();
+    // Clear this user's presence while Firebase Auth is still valid, then sign out.
+    document.getElementById("logoutBtn").onclick = async () => {
+      const userToLogOut = currentUser || auth.currentUser;
+      try {
+        if (userToLogOut) {
+          const connectedRef = db.ref(".info/connected");
+          if (window.__mehfilPresenceHandler) {
+            connectedRef.off("value", window.__mehfilPresenceHandler);
+            window.__mehfilPresenceHandler = null;
+          }
+          await db.ref("status/" + userToLogOut.uid).remove();
+        }
+      } catch (err) {
+        console.error("Presence cleanup before logout failed:", err);
+      }
+      await auth.signOut();
+    };
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedCountry = localStorage.getItem('user_country');
@@ -2903,13 +2919,25 @@ function switchBottomTab(tabName) {
         // then mark this UID online. Repeat this sequence after every reconnect.
         const userStatusRef = db.ref("status/" + user.uid);
         const connectedRef = db.ref(".info/connected");
-        connectedRef.off("value", window.__mehfilPresenceHandler || undefined);
+        // Remove any stale record for this UID before establishing this session.
+        // onDisconnect must be confirmed by Firebase before the UID is marked online.
+        if (window.__mehfilPresenceHandler) {
+          connectedRef.off("value", window.__mehfilPresenceHandler);
+        }
+        let presenceSetupInProgress = false;
         const presenceHandler = snapshot => {
-          if (snapshot.val() === true) {
-            userStatusRef.onDisconnect().remove()
-              .then(() => userStatusRef.set(true))
-              .catch(err => console.error("Presence setup failed:", err));
-          }
+          if (snapshot.val() !== true || presenceSetupInProgress) return;
+          presenceSetupInProgress = true;
+          userStatusRef.onDisconnect().remove()
+            .then(() => {
+              // Do not mark online if this user has already signed out while setup was pending.
+              if (auth.currentUser && auth.currentUser.uid === user.uid) {
+                return userStatusRef.set(true);
+              }
+              return userStatusRef.remove();
+            })
+            .catch(err => console.error("Presence setup failed:", err))
+            .finally(() => { presenceSetupInProgress = false; });
         };
         window.__mehfilPresenceHandler = presenceHandler;
         connectedRef.on("value", presenceHandler);
@@ -2927,9 +2955,16 @@ function switchBottomTab(tabName) {
           }
         }, 150);
       } else {
+        // Fallback cleanup for session expiry or sign-out from another part of the app.
+        // Explicit logout already removes presence before auth.signOut().
         if (currentUser) {
-          db.ref("status/" + currentUser.uid).remove().catch(err => {
-            console.error("Presence cleanup on logout failed:", err);
+          const oldUid = currentUser.uid;
+          if (window.__mehfilPresenceHandler) {
+            db.ref(".info/connected").off("value", window.__mehfilPresenceHandler);
+            window.__mehfilPresenceHandler = null;
+          }
+          db.ref("status/" + oldUid).remove().catch(err => {
+            console.error("Presence cleanup on auth change failed:", err);
           });
         }
         currentUser = null;
