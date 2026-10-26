@@ -3331,7 +3331,11 @@ function switchBottomTab(tabName) {
       if (onlineCountListenerStarted || !currentUser) return;
       onlineCountListenerStarted = true;
       db.ref("status").on("value", snapshot => {
-        const count = snapshot.numChildren();
+        const statusData = snapshot.val() || {};
+        // Count only users explicitly marked online, matching the admin online list.
+        const count = Object.values(statusData).filter(value =>
+          value === true || (value && typeof value === "object" && value.online === true)
+        ).length;
         const onlineEl = document.getElementById("onlineCount");
         const onlineCompEl = document.getElementById("onlineCountComp");
         if (onlineEl) onlineEl.innerText = count;
