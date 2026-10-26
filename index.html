@@ -2843,6 +2843,7 @@ function switchBottomTab(tabName) {
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
+        initOnlineCountListener();
         // Start the competition availability listener only after Firebase auth is ready.
         // This prevents the initial unauthenticated read from getting stuck on permission-denied.
         loadCompetitionAvailability();
@@ -3324,13 +3325,60 @@ function switchBottomTab(tabName) {
     });
     setInterval(checkPrayerPopup, 1000);
 
-    db.ref("status").on("value", snapshot => {
-      const count = snapshot.numChildren();
-      const onlineEl = document.getElementById("onlineCount");
-      const onlineCompEl = document.getElementById("onlineCountComp");
-      if(onlineEl) onlineEl.innerText = count;
-      if(onlineCompEl) onlineCompEl.innerText = count;
-    });
+    // Online presence listeners are started only after Firebase authentication is ready.
+    let onlineCountListenerStarted = false;
+    function initOnlineCountListener() {
+      if (onlineCountListenerStarted || !currentUser) return;
+      onlineCountListenerStarted = true;
+      db.ref("status").on("value", snapshot => {
+        const count = snapshot.numChildren();
+        const onlineEl = document.getElementById("onlineCount");
+        const onlineCompEl = document.getElementById("onlineCountComp");
+        if (onlineEl) onlineEl.innerText = count;
+        if (onlineCompEl) onlineCompEl.innerText = count;
+      }, err => {
+        onlineCountListenerStarted = false;
+        console.error("Online count read failed:", err);
+      });
+    }
+
+    // Admin-only live list of users whose presence record currently exists.
+    let onlineUsersListenersStarted = false;
+    function loadOnlineUsers() {
+      if (!currentUser || String(currentUser.email || '').toLowerCase() !== String(ADMIN_EMAIL || '').toLowerCase()) return;
+      const panel = document.getElementById('adminOnlineUsersPanel');
+      const list = document.getElementById('onlineUsersList');
+      if (panel) panel.style.display = 'block';
+      if (!list) return;
+      if (onlineUsersListenersStarted) return;
+      onlineUsersListenersStarted = true;
+
+      let statusData = {};
+      let usersData = {};
+      const render = () => {
+        const ids = Object.keys(statusData || {}).filter(uid => statusData[uid] === true || (statusData[uid] && statusData[uid].online === true));
+        if (!ids.length) {
+          list.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px;">اس وقت کوئی صارف آن لائن نہیں ہے۔</div>';
+          return;
+        }
+        list.innerHTML = ids.map(uid => {
+          const u = usersData[uid] || {};
+          const name = String(u.name || u.displayName || u.email || 'صارف').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+          const email = String(u.email || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+          return '<div class="online-user" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 0;padding:8px;border:1px solid #bbf7d0;border-radius:9px;background:#fff;">' +
+            '<span><span class="online-dot"></span> <b>' + name + '</b>' + (email ? '<div style="font-size:10px;color:var(--text-muted);direction:ltr;text-align:right;">' + email + '</div>' : '') + '</span>' +
+            '<span style="font-size:10px;color:#15803d;white-space:nowrap;">آن لائن</span></div>';
+        }).join('');
+      };
+      db.ref('status').on('value', snap => { statusData = snap.val() || {}; render(); }, err => {
+        onlineUsersListenersStarted = false;
+        list.innerHTML = '<div style="font-size:12px;color:#b91c1c;padding:8px;">آن لائن صارفین لوڈ نہیں ہو سکے۔ Firebase Rules چیک کریں۔</div>';
+        console.error('Online users status read failed:', err);
+      });
+      db.ref('users').on('value', snap => { usersData = snap.val() || {}; render(); }, err => {
+        console.error('Online users profile read failed:', err);
+      });
+    }
 
 
     // Build the latest 5 daily winners from competition records.
