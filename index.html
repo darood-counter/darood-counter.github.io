@@ -604,12 +604,12 @@
     .chat-send{min-width:82px;height:48px;border:0;background:#0d3b22;color:#fff;border-radius:24px;padding:10px 16px;font-family:inherit;font-weight:bold;cursor:pointer;flex:0 0 auto}
 
     /* When a conversation is opened, use the whole screen instead of the narrow page card. */
-    #privateChatView:not(.hidden){position:fixed;inset:0 0 70px 0;z-index:999;background:#fff;padding:10px 8px;box-sizing:border-box;overflow:hidden}
+    #privateChatView:not(.hidden){position:fixed;inset:18px 0 70px 0;z-index:999;background:#fff;padding:10px 8px;box-sizing:border-box;overflow:hidden}
     #privateChatView:not(.hidden)>.chat-panel{width:100%;height:100%;min-height:0;box-sizing:border-box;margin:0;padding:10px 6px;border-radius:0;border:0;box-shadow:none;display:flex;flex-direction:column}
     #privateChatView:not(.hidden) .chat-messages{flex:1;height:auto;min-height:0;max-height:none}
     #privateChatView:not(.hidden) .chat-compose{flex:0 0 auto;padding-bottom:2px}
     @media (max-width:480px){
-      #privateChatView:not(.hidden){padding:7px 4px}
+      #privateChatView:not(.hidden){inset:24px 0 70px 0;padding:7px 4px}
       #privateChatView:not(.hidden)>.chat-panel{padding:7px 2px}
       .chat-bubble{max-width:86%}
       .chat-send{min-width:78px;padding-left:13px;padding-right:13px}
@@ -1330,11 +1330,6 @@
         </div>
 
         </div>
-          <div class="hadith-card" id="dailyHadithCard">
-            <div class="hadith-title">📖 آج کی حدیث</div>
-            <div class="hadith-text" id="dailyHadithText">تم میں بہترین وہ ہے جو قرآن سیکھے اور سکھائے۔</div>
-            <div class="hadith-ref" id="dailyHadithRef">صحیح البخاری، کتاب فضائل القرآن</div>
-          </div>
         <!-- END PRAYER TIMES CARD -->
 
 
@@ -1375,14 +1370,6 @@
 
           <div id="adminWinnersList">لوڈ ہو رہا ہے...</div>
 
-          <div class="admin-hadith-box">
-            <div style="font-size:14px;font-weight:800;color:#92400e;margin-bottom:6px;">📖 آج کی حدیث تبدیل کریں</div>
-            <div style="font-size:11px;color:#78716c;margin-bottom:5px;">یہ حدیث تمام صارفین کے Home Page پر دکھائی جائے گی۔</div>
-            <textarea id="adminHadithText" placeholder="حدیث کا متن لکھیں..." dir="rtl"></textarea>
-            <input id="adminHadithRef" type="text" placeholder="حوالہ، مثلاً: صحیح بخاری، حدیث نمبر ..." dir="rtl">
-            <button class="save-profile-btn" style="width:100%;margin-top:8px;background:#15803d;" onclick="saveAdminHadith()">💾 حدیث محفوظ کریں</button>
-            <div id="adminHadithStatus" style="font-size:11px;margin-top:6px;text-align:center;"></div>
-          </div>
         </div>
 
         
@@ -2389,8 +2376,15 @@ function openAdminContact(){
   }).catch(()=>alert('Admin کا اکاؤنٹ نہیں مل سکا۔ براہِ کرم بعد میں دوبارہ کوشش کریں۔'));
 }
 
+function pushChatDetailHistory(){
+  if (window.history && window.history.pushState && currentUser) {
+    window.history.pushState({ mehfilApp: true, view: 'chatDetail', tab: 'chat' }, '');
+  }
+}
+
 function openAdminChat(){
   if(!currentUser||!ADMIN_UID)return;
+  pushChatDetailHistory();
   const uid=String(currentUser.uid);
   activeChatUser={uid:String(ADMIN_UID),name:'Admin',isAdmin:true,adminChat:true};
   const listView=document.getElementById('chatListView'),privateView=document.getElementById('privateChatView');
@@ -2425,6 +2419,7 @@ function loadRecentChats(){
 
 function openPrivateChat(uid,name){
   if(!currentUser||!uid||uid===currentUser.uid||String(uid)===String(ADMIN_UID||''))return;
+  pushChatDetailHistory();
   activeChatUser={uid:String(uid),name:name||'صارف',isAdmin:false,adminChat:false};
   const listView=document.getElementById('chatListView'),privateView=document.getElementById('privateChatView');if(!listView||!privateView)return;
   listView.classList.add('hidden');privateView.classList.remove('hidden');document.getElementById('chatWithName').innerText=activeChatUser.name;document.getElementById('chatWithStatus').innerText='لوڈ ہو رہا ہے...';markChatRead(uid);
@@ -2459,7 +2454,7 @@ function clearCurrentChat(){
   const room=chatUserKey(currentUser.uid,activeChatUser.uid);if(!confirm('اس نارمل چیٹ کے تمام پیغامات حذف ہو جائیں گے۔ جاری رکھیں؟'))return;db.ref('chats/'+room).remove().then(()=>{markChatRead(activeChatUser.uid);loadRecentChats();}).catch(()=>alert('چیٹ صاف نہیں ہو سکی۔'));
 }
 
-function closePrivateChat(){if(activeChatListener){activeChatListener();activeChatListener=null;}activeChatUser=null;document.getElementById('privateChatView').classList.add('hidden');document.getElementById('chatListView').classList.remove('hidden');loadRecentChats();}
+function closePrivateChat(fromHistory=false){if(!fromHistory && window.history && window.history.state && window.history.state.mehfilApp && window.history.state.view==='chatDetail'){window.history.back();return;}if(activeChatListener){activeChatListener();activeChatListener=null;}activeChatUser=null;document.getElementById('privateChatView').classList.add('hidden');document.getElementById('chatListView').classList.remove('hidden');loadRecentChats();}
 function markAdminChatRead(){if(!currentUser)return;closeChatNotification('admin_'+currentUser.uid);db.ref('adminChatUnread/'+currentUser.uid).set(0).catch(()=>{});}
 
 function sendChatMessage(){
@@ -2527,6 +2522,7 @@ function loadAdminRecentChats(){
 
 function openAdminNormalRoom(roomKey){
   if(!currentUser||currentUser.email!==ADMIN_EMAIL||!roomKey)return;
+  pushChatDetailHistory();
   document.getElementById('chatListView').classList.add('hidden');document.getElementById('privateChatView').classList.remove('hidden');
   if(activeChatListener)activeChatListener();
   activeChatUser={uid:'',name:'User Chat',isAdmin:false,adminChat:false,adminNormalRoom:true,roomKey:roomKey};
@@ -2567,7 +2563,7 @@ function sendAdminBroadcast(){
 }
 
 function openAdminRoom(userUid){
-  if(!currentUser||currentUser.email!==ADMIN_EMAIL||!userUid)return;document.getElementById('chatListView').classList.add('hidden');document.getElementById('privateChatView').classList.remove('hidden');if(activeChatListener)activeChatListener();activeChatUser={uid:String(userUid),name:'صارف',isAdmin:false,adminChat:true};
+  if(!currentUser||currentUser.email!==ADMIN_EMAIL||!userUid)return;pushChatDetailHistory();document.getElementById('chatListView').classList.add('hidden');document.getElementById('privateChatView').classList.remove('hidden');if(activeChatListener)activeChatListener();activeChatUser={uid:String(userUid),name:'صارف',isAdmin:false,adminChat:true};
   db.ref('users/'+userUid).once('value').then(us=>{const u=us.val()||{};activeChatUser.name=u.name||u.displayName||'صارف';document.getElementById('chatWithName').innerText='💬 '+activeChatUser.name;document.getElementById('chatWithStatus').innerText='Admin Chat';}).catch(()=>{document.getElementById('chatWithName').innerText='💬 صارف';document.getElementById('chatWithStatus').innerText='Admin Chat';});
   db.ref('adminChatUnreadByUser/'+currentUser.uid+'/'+userUid).set(0).catch(()=>{});const ref=db.ref('adminChats/'+userUid).orderByChild('timestamp');
   const handler=s=>{const box=document.getElementById('chatMessages');if(!box)return;const arr=[];s.forEach(m=>{const v=m.val()||{};if(Number(v.timestamp||0)>=Date.now()-CHAT_EXPIRY_MS)arr.push({key:m.key,...v});});box.innerHTML=arr.map(m=>{const mine=m.sender===currentUser.uid;const nameHtml=mine?'':`<b style="display:block;font-size:11px;margin-bottom:3px;">${escapeChatHtml(activeChatUser.name||m.senderName||'صارف')}</b>`;return `<div class="chat-bubble-row ${mine?'me':'them'} chat-longpress" data-message-key="${escapeChatHtml(m.key)}" data-message-owner="${mine?'me':'them'}" data-admin-room-user="${escapeChatHtml(userUid)}"><div class="chat-bubble ${mine?'chat-me':'chat-them'}" style="max-width:82%;padding:9px 12px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font-size:14px;">${nameHtml}<div>${escapeChatHtml(m.text||'')}</div><div class="chat-meta">${chatTime(m.timestamp)}</div></div></div>`;}).join('')||'<div style="text-align:center;padding:30px;font-size:12px;">کوئی پیغام نہیں۔</div>';box.scrollTop=box.scrollHeight;attachChatLongPress();};ref.on('value',handler);activeChatListener=()=>ref.off('value',handler);
@@ -2604,7 +2600,15 @@ function initChatSystem(){
 }
 /* ================= END CHAT SYSTEM ================= */
 
-function switchBottomTab(tabName) {
+function switchBottomTab(tabName, fromHistory = false) {
+      // Keep browser/mobile Back in sync with this single-page app's internal tabs.
+      if (!fromHistory && currentUser && window.history && window.history.pushState) {
+        const currentState = window.history.state || {};
+        if (!(currentState.mehfilApp && currentState.view === 'tab' && currentState.tab === tabName)) {
+          window.history.pushState({ mehfilApp: true, view: 'tab', tab: tabName }, '');
+        }
+      }
+      window.__mehfilCurrentTab = tabName;
       // Remember the last internal page so a refresh returns the user to the same page.
       try { localStorage.setItem('last_active_tab', tabName); } catch(e) {}
       if (tabName !== 'reward') {
@@ -2856,6 +2860,20 @@ function switchBottomTab(tabName) {
       return { userList, globalTotal };
     }
 
+    // Mobile/browser Back: close an open conversation first, otherwise restore the prior tab.
+    window.addEventListener('popstate', event => {
+      const privateView = document.getElementById('privateChatView');
+      const chatIsOpen = privateView && !privateView.classList.contains('hidden');
+      if (chatIsOpen) {
+        closePrivateChat(true);
+        return;
+      }
+      const state = event.state;
+      if (state && state.mehfilApp && state.view === 'tab' && state.tab) {
+        switchBottomTab(state.tab, true);
+      }
+    });
+
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
@@ -2943,6 +2961,10 @@ function switchBottomTab(tabName) {
         connectedRef.on("value", presenceHandler);
         initChatSystem();
 
+        // Establish a safe base entry for mobile/browser Back, then restore the saved tab.
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({ mehfilApp: true, view: 'tab', tab: 'home' }, '');
+        }
         // Restore the page/tab that was open before refresh. Tasbeeh will also
         // resume its normal auto-listening when that page is restored.
         setTimeout(() => {
@@ -3089,7 +3111,11 @@ function switchBottomTab(tabName) {
     ];
 
     function getDailyHadith() {
-      const dayNumber = Math.floor(Date.now() / 86400000);
+      // Use the user's local calendar date so the Hadith changes at local midnight,
+      // not at UTC midnight (which differs in Dubai and other time zones).
+      const now = new Date();
+      const localMidnightUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayNumber = Math.floor(localMidnightUtc / 86400000);
       return DAILY_HADITHS[((dayNumber % DAILY_HADITHS.length) + DAILY_HADITHS.length) % DAILY_HADITHS.length];
     }
 
@@ -3859,37 +3885,16 @@ function switchBottomTab(tabName) {
     }
 
     function loadHadithContent() {
-      db.ref("siteContent/hadith").once("value").then(snapshot => {
-        const h = snapshot.val();
-        const finalHadith = (h && h.text) ? h : DEFAULT_HADITH;
-        renderHadith(finalHadith);
-        if (currentUser && currentUser.email === ADMIN_EMAIL) {
-          const t = document.getElementById("adminHadithText");
-          const r = document.getElementById("adminHadithRef");
-          if (t) t.value = finalHadith.text;
-          if (r) r.value = finalHadith.ref || "";
-        }
-      }).catch(() => renderHadith(DEFAULT_HADITH));
+      // Keep one source of truth: the date-aware daily Hadith system above.
+      // A saved admin override applies only to its saved local date; otherwise
+      // the automatically selected Hadith is shown.
+      loadDailyHadith();
+      if (currentUser && currentUser.email === ADMIN_EMAIL) loadAdminHadithEditor();
     }
 
     function saveAdminHadith() {
-      if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
-      const textEl = document.getElementById("adminHadithText");
-      const refEl = document.getElementById("adminHadithRef");
-      const statusEl = document.getElementById("adminHadithStatus");
-      const text = (textEl && textEl.value || "").trim();
-      const ref = (refEl && refEl.value || "").trim();
-      if (!text) {
-        if (statusEl) { statusEl.style.color = "#dc2626"; statusEl.textContent = "پہلے حدیث کا متن لکھیں۔"; }
-        return;
-      }
-      if (statusEl) { statusEl.style.color = "#92400e"; statusEl.textContent = "محفوظ ہو رہی ہے..."; }
-      db.ref("siteContent/hadith").set({text:text, ref:ref || "حوالہ درج نہیں کیا گیا"}).then(() => {
-        renderHadith({text:text, ref:ref || "حوالہ درج نہیں کیا گیا"});
-        if (statusEl) { statusEl.style.color = "#15803d"; statusEl.textContent = "✓ حدیث کامیابی سے محفوظ ہو گئی۔"; }
-      }).catch(() => {
-        if (statusEl) { statusEl.style.color = "#dc2626"; statusEl.textContent = "حدیث محفوظ نہیں ہو سکی۔ Firebase Rules چیک کریں۔"; }
-      });
+      // Backward-compatible alias for the date-limited override workflow.
+      saveHadithOverride();
     }
 
     function loadAdminData() {
@@ -4054,6 +4059,8 @@ function switchBottomTab(tabName) {
     let activeTasbeehRecognition = null;
     let tasbeehAutoRestartTimer = null;
     let tasbeehSilentModeActive = false;
+    // Prevent multiple Yes clicks from counting more than once in one silent-reading round.
+    let tasbeehSilentCountLocked = false;
     let tasbeehSilentIntroTimer = null;
     let tasbeehSilentRoundTimer = null;
     let tasbeehSilentCountdownTimer = null;
@@ -4328,6 +4335,11 @@ function switchBottomTab(tabName) {
     function startTasbeehSilentRound() {
       const rewardTab = document.getElementById('rewardTab');
       if (!rewardTab || rewardTab.classList.contains('hidden')) return;
+      tasbeehSilentCountLocked = false;
+      const yesBtn = document.getElementById('tasbeehYesBtn');
+      const noBtn = document.getElementById('tasbeehNoBtn');
+      if (yesBtn) yesBtn.disabled = false;
+      if (noBtn) noBtn.disabled = false;
       tasbeehSilentModeActive = true;
       requestScreenWakeLock();
       const notice = document.getElementById('tasbeehSilentNotice');
@@ -4359,6 +4371,11 @@ function switchBottomTab(tabName) {
       const rewardTab = document.getElementById('rewardTab');
       if (!rewardTab || rewardTab.classList.contains('hidden')) return;
       hideTasbeehSilentUI();
+      tasbeehSilentCountLocked = false;
+      const yesBtn = document.getElementById('tasbeehYesBtn');
+      const noBtn = document.getElementById('tasbeehNoBtn');
+      if (yesBtn) yesBtn.disabled = false;
+      if (noBtn) noBtn.disabled = false;
       tasbeehSilentModeActive = true;
       // Keep the screen awake during the full 3s + 15s silent-reading flow.
       requestScreenWakeLock();
@@ -4408,7 +4425,14 @@ function switchBottomTab(tabName) {
     }
 
     function addSilentTasbeehCount() {
-      if (!currentUser) return;
+      // Lock immediately, before any Firebase request, so rapid/repeated taps
+      // cannot start multiple increments during the same Yes/No prompt.
+      if (!currentUser || !tasbeehSilentModeActive || tasbeehSilentCountLocked) return;
+      tasbeehSilentCountLocked = true;
+      const yesBtn = document.getElementById('tasbeehYesBtn');
+      const noBtn = document.getElementById('tasbeehNoBtn');
+      if (yesBtn) yesBtn.disabled = true;
+      if (noBtn) noBtn.disabled = true;
       const status = document.getElementById('statusMsg');
       const totalEl = document.getElementById('userTotal');
       const uid = currentUser.uid;
@@ -4447,6 +4471,10 @@ function switchBottomTab(tabName) {
         })
         .catch(err => {
           console.error('Silent Tasbeeh count save failed:', err);
+          // Allow a retry only if the same prompt is still active.
+          tasbeehSilentCountLocked = false;
+          if (yesBtn && tasbeehSilentModeActive) yesBtn.disabled = false;
+          if (noBtn && tasbeehSilentModeActive) noBtn.disabled = false;
           if (status) {
             status.style.color = '#ef4444';
             status.innerText = '✗ کاؤنٹ محفوظ نہیں ہو سکا، دوبارہ کوشش کریں۔';
