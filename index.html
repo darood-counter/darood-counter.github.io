@@ -912,7 +912,7 @@
     /* ===== FINAL CHAT UI POLISH ===== */
     #privateChatView:not(.hidden){
       position:fixed;
-      left:0;right:0;top:0;
+      left:0;right:0;top:84px;
       bottom:70px;
       width:100%;
       height:auto;
@@ -2135,31 +2135,48 @@
     }
 
 
-    // Download certificate from Payment Proofs only.
+    // Render the certificate in a temporary visible layer so downloads work
+    // even when the Competition tab (or its parent) is hidden.
     function downloadSpecificCertificate(name, score, dateKey) {
-      const card = document.getElementById("latestWinnerCertificateCard");
-      const cert = document.getElementById("latestCertificateContainer");
-      if (!card || !cert || typeof html2canvas === "undefined") return;
-      const nameEl = document.getElementById("latestCertWinnerName");
-      const scoreEl = document.getElementById("latestCertWinnerScore");
-      const dateEl = document.getElementById("latestCertDate");
-      const old = { name:nameEl.innerText, score:scoreEl.innerText, date:dateEl.innerText };
-      nameEl.innerText = name || "Winner";
-      scoreEl.innerText = score || 0;
-      dateEl.innerText = dateKey || "";
-      const wasHidden = card.classList.contains("hidden");
-      card.classList.remove("hidden");
-      setTimeout(() => {
-        html2canvas(cert, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
+      const sourceCert = document.getElementById("latestCertificateContainer");
+      if (!sourceCert || typeof html2canvas === "undefined") {
+        alert("سرٹیفکیٹ ابھی تیار نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔");
+        return;
+      }
+
+      const renderHost = document.createElement("div");
+      renderHost.style.cssText = "position:fixed;left:-10000px;top:0;width:420px;z-index:-1;display:block;background:#fff;";
+      const cert = sourceCert.cloneNode(true);
+      cert.style.width = "390px";
+      cert.style.maxWidth = "390px";
+      cert.style.boxSizing = "border-box";
+      cert.style.display = "block";
+      cert.style.visibility = "visible";
+      const nameEl = cert.querySelector("#latestCertWinnerName");
+      const scoreEl = cert.querySelector("#latestCertWinnerScore");
+      const dateEl = cert.querySelector("#latestCertDate");
+      if (nameEl) nameEl.textContent = name || "Winner";
+      if (scoreEl) scoreEl.textContent = String(score || 0);
+      if (dateEl) dateEl.textContent = dateKey || "";
+      renderHost.appendChild(cert);
+      document.body.appendChild(renderHost);
+
+      html2canvas(cert, { scale: 2, useCORS: true, backgroundColor: "#fff", logging: false })
+        .then(canvas => {
           const link = document.createElement("a");
-          link.download = `Certificate_${name || "Winner"}_${dateKey || "date"}.png`;
+          const safeName = String(name || "Winner").replace(/[\\/:*?"<>|]+/g, "_");
+          const safeDate = String(dateKey || "date").replace(/[\\/:*?"<>|]+/g, "_");
+          link.download = `Certificate_${safeName}_${safeDate}.png`;
           link.href = canvas.toDataURL("image/png");
+          document.body.appendChild(link);
           link.click();
-        }).finally(() => {
-          nameEl.innerText = old.name; scoreEl.innerText = old.score; dateEl.innerText = old.date;
-          if (wasHidden) card.classList.add("hidden");
-        });
-      }, 150);
+          link.remove();
+        })
+        .catch(error => {
+          console.error("Certificate download failed:", error);
+          alert("سرٹیفکیٹ ڈاؤنلوڈ نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔");
+        })
+        .finally(() => renderHost.remove());
     }
 
     function updateCompCountdown() {
@@ -2961,9 +2978,10 @@ function switchBottomTab(tabName, fromHistory = false) {
         connectedRef.on("value", presenceHandler);
         initChatSystem();
 
-        // Establish a safe base entry for mobile/browser Back, then restore the saved tab.
+        // Establish a home-tab base entry so Back can return through internal tabs
+        // before leaving the app. The next selected tab is pushed above this entry.
         if (window.history && window.history.replaceState) {
-          window.history.replaceState({ mehfilApp: true, view: 'tab', tab: 'home' }, '');
+          window.history.replaceState({ mehfilApp: true, view: 'tab', tab: 'home', root: true }, '');
         }
         // Restore the page/tab that was open before refresh. Tasbeeh will also
         // resume its normal auto-listening when that page is restored.
@@ -3110,12 +3128,25 @@ function switchBottomTab(tabName, fromHistory = false) {
       }
     ];
 
+    function getHadithDateKey(date = new Date()) {
+      // Use Dubai's calendar date consistently, regardless of the device timezone.
+      try {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Asia/Dubai', year: 'numeric', month: '2-digit', day: '2-digit'
+        }).formatToParts(date);
+        const values = {};
+        parts.forEach(part => { if (part.type !== 'literal') values[part.type] = part.value; });
+        return `${values.year}-${values.month}-${values.day}`;
+      } catch (e) {
+        return getLocalDateKey(date);
+      }
+    }
+
     function getDailyHadith() {
-      // Use the user's local calendar date so the Hadith changes at local midnight,
-      // not at UTC midnight (which differs in Dubai and other time zones).
-      const now = new Date();
-      const localMidnightUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-      const dayNumber = Math.floor(localMidnightUtc / 86400000);
+      // Rotate by Dubai's calendar date so the Hadith changes at Dubai midnight.
+      const dateKey = getHadithDateKey();
+      const parts = dateKey.split('-').map(Number);
+      const dayNumber = Math.floor(Date.UTC(parts[0], parts[1] - 1, parts[2]) / 86400000);
       return DAILY_HADITHS[((dayNumber % DAILY_HADITHS.length) + DAILY_HADITHS.length) % DAILY_HADITHS.length];
     }
 
@@ -3147,7 +3178,7 @@ function switchBottomTab(tabName, fromHistory = false) {
         const saved = snapshot.val();
         if (!saved || !saved.text) return;
 
-        const today = getLocalDateKey();
+        const today = getHadithDateKey();
         if (saved.date === today) {
           const textEl = document.getElementById("dailyHadithText");
           const refEl = document.getElementById("dailyHadithRef");
@@ -3175,7 +3206,7 @@ function switchBottomTab(tabName, fromHistory = false) {
       db.ref("siteContent/hadith").set({
         text: text,
         ref: ref,
-        date: getLocalDateKey(),
+        date: getHadithDateKey(),
         updatedAt: firebase.database.ServerValue.TIMESTAMP,
         updatedBy: currentUser.uid
       }).then(() => {
@@ -3215,7 +3246,7 @@ function switchBottomTab(tabName, fromHistory = false) {
 
       db.ref("siteContent/hadith").once("value").then(snapshot => {
         const saved = snapshot.val() || {};
-        const today = getLocalDateKey();
+        const today = getHadithDateKey();
 
         const t = document.getElementById("adminHadithText");
         const r = document.getElementById("adminHadithRef");
@@ -3235,14 +3266,18 @@ function switchBottomTab(tabName, fromHistory = false) {
 
       // Refresh shortly after midnight so the next day's hadith appears
       // without requiring the user to reload the page.
-      let lastHadithDate = getLocalDateKey();
-      setInterval(() => {
-        const nowDate = getLocalDateKey();
+      let lastHadithDate = getHadithDateKey();
+      const checkHadithDateRollover = () => {
+        const nowDate = getHadithDateKey();
         if (nowDate !== lastHadithDate) {
           lastHadithDate = nowDate;
           loadDailyHadith();
         }
-      }, 30000);
+      };
+      setInterval(checkHadithDateRollover, 30000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkHadithDateRollover();
+      });
     }
 
     /* ================= END DAILY HADITH SYSTEM ================= */
