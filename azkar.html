@@ -889,7 +889,9 @@ const PRAYERS=[["Fajr","فجر"],["Dhuhr","ظہر"],["Asr","عصر"],["Maghrib",
 let journeyData=null,journeyTimerHandle=null,prayerTimings=null,prayerDateKey="",prayerPromptShown="",journeyRotating=false;
 let serverOffset=0;
 let prayerEvents=[];
-const journeyRoot=()=>currentUser?db.ref("dailyJourney/"+currentUser.uid):null;
+// Store journey data inside the authenticated user node, where the app's existing
+// per-user Firebase rules already apply.
+const journeyRoot=()=>currentUser?db.ref("users/"+currentUser.uid+"/dailyJourney"):null;
 function journeyNow(){return Date.now()+serverOffset;}
 function localDateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 function safeKey(s){return String(s).replace(/[.#$/\[\]]/g,"_");}
@@ -963,7 +965,12 @@ async function startJourney(){
  try{
    await ref.set(data);journeyData=data;taskIndex=0;$("journeyStart").hidden=true;
    syncGoodDeeds();updateJourneyUI();setJourneyMessage("آپ کا 24 گھنٹے کا سفر شروع ہو گیا ہے۔ اللہ آپ کے لیے آسانی فرمائے۔");
- }catch(e){setJourneyMessage("سفر شروع نہیں ہو سکا۔ انٹرنیٹ چیک کر کے دوبارہ کوشش کریں۔");}
+ }catch(e){
+   console.error("startJourney Firebase error:",e);
+   const code=e&&e.code?String(e.code):"unknown";
+   const detail=code==="PERMISSION_DENIED"?"Firebase اجازت نہیں دے رہا (PERMISSION_DENIED)۔ Database Rules میں users/$uid کے لیے authenticated user کو write اجازت درکار ہے۔":code==="NETWORK_ERROR"?"انٹرنیٹ کنکشن دستیاب نہیں۔":("Firebase مسئلہ: "+code+" — "+(e&&e.message?e.message:"دوبارہ کوشش کریں۔"));
+   setJourneyMessage("سفر شروع نہیں ہو سکا۔ "+detail);
+ }
 }
 async function finishJourney(){
  if(!currentUser||!journeyData||journeyData.ended||journeyRotating)return;
@@ -1041,7 +1048,7 @@ renderGoodDeeds();
 db.ref(".info/serverTimeOffset").on("value",s=>{serverOffset=Number(s.val()||0);});
 auth.onAuthStateChanged(user=>{
  if(user){
-   ensureJourney().then(()=>{renderPrayerList();checkPrayerPrompts();if(!prayerTimings)loadPrayerTimes();}).catch(e=>console.warn("Journey load failed",e));
+   ensureJourney().then(()=>{renderPrayerList();checkPrayerPrompts();if(!prayerTimings)loadPrayerTimes();}).catch(e=>{console.error("Journey load failed",e);setJourneyMessage("سفر کا ریکارڈ لوڈ نہیں ہو سکا: "+(e&&e.code?e.code:(e&&e.message?e.message:"نامعلوم خرابی")));});
  }
  else{journeyData=null;$("journeyTimer").textContent="لاگ اِن درکار";$("prayerPrompt").hidden=true;$("taskCard").innerHTML="<div class=\"taskIcon\">🔐</div><div class=\"taskTitle\">آپ کا اکاؤنٹ درکار ہے</div><div class=\"taskDescription\">پہلے index.html میں لاگ اِن کریں، پھر یہاں واپس آئیں۔ آپ کا لاگ اِن خود بخود پہچان لیا جائے گا۔</div>";$("taskActions").hidden=true;}
 });
