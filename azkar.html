@@ -243,8 +243,6 @@ html,body{background:#07110f}
           <button type="button" class="taskDone" id="taskDone">✓ مکمل ہو گیا</button>
           <button type="button" class="taskLater" id="taskLater">بعد میں</button>
         </div>
-        <div class="prayerLocation"><span id="prayerLocationText">نماز کے اوقات حاصل کرنے کے لیے مقام کی اجازت دیں۔</span><button type="button" id="loadPrayerTimes">نماز کے اوقات</button></div>
-        <div id="prayerList" class="prayerList"></div><div id="prayerPrompt" class="prayerPrompt" hidden></div>
         <div id="goodDeeds" class="goodDeeds"></div>
       </section>
     </div>
@@ -883,12 +881,15 @@ const JOURNEY_GOODS=[
   {id:"charity",label:"صدقہ یا کسی کی مدد"},
   {id:"help",label:"کسی ضرورت مند کی مدد"},
   {id:"quran",label:"قرآنِ پاک کی تلاوت"},
-  {id:"kindness",label:"اچھا اخلاق اور نرم گفتگو"}
+  {id:"kindness",label:"اچھا اخلاق اور نرم گفتگو"},
+  {id:"prayer_Fajr",label:"کیا آپ نے فجر کی نماز ادا کی؟",type:"prayer",prayerKey:"Fajr"},
+  {id:"prayer_Dhuhr",label:"کیا آپ نے ظہر کی نماز ادا کی؟",type:"prayer",prayerKey:"Dhuhr"},
+  {id:"prayer_Asr",label:"کیا آپ نے عصر کی نماز ادا کی؟",type:"prayer",prayerKey:"Asr"},
+  {id:"prayer_Maghrib",label:"کیا آپ نے مغرب کی نماز ادا کی؟",type:"prayer",prayerKey:"Maghrib"},
+  {id:"prayer_Isha",label:"کیا آپ نے عشاء کی نماز ادا کی؟",type:"prayer",prayerKey:"Isha"}
 ];
-const PRAYERS=[["Fajr","فجر"],["Dhuhr","ظہر"],["Asr","عصر"],["Maghrib","مغرب"],["Isha","عشاء"]];
-let journeyData=null,journeyTimerHandle=null,prayerTimings=null,prayerDateKey="",prayerPromptShown="",journeyRotating=false;
+let journeyData=null,journeyTimerHandle=null,journeyRotating=false;
 let serverOffset=0;
-let prayerEvents=[];
 // Store journey data inside the authenticated user node, where the app's existing
 // per-user Firebase rules already apply.
 const journeyRoot=()=>currentUser?db.ref("users/"+currentUser.uid+"/dailyJourney"):null;
@@ -905,12 +906,26 @@ function renderTaskCard(){
  if(!journeyData||!journeyData.startAt||journeyData.ended){card.className="taskFinish";card.textContent=journeyData&&journeyData.ended?"آج کا سفر مکمل ہو چکا ہے۔ اگلا سفر آپ خود شروع کر سکتے ہیں۔":"سفر شروع کرنے کے بعد آپ کا پہلا کام یہاں آئے گا۔";actions.hidden=true;step.textContent="—";return;}
  if(taskIndex>=JOURNEY_GOODS.length){card.className="taskFinish";card.innerHTML="🌟 ماشاءاللہ! آج کے تمام اضافی نیک اعمال درج ہو گئے۔<br>اذکار جاری رکھیں اور اپنے اگلے نماز کے سوال کا انتظار کریں۔";actions.hidden=true;step.textContent=`${completed}/${JOURNEY_GOODS.length} مکمل`;return;}
  const task=JOURNEY_GOODS[taskIndex];
- const icons={parents:"🤲",charity:"💝",help:"🫱🏻‍🫲🏼",quran:"📖",kindness:"🌿"};
+ const icons={parents:"🤲",charity:"💝",help:"🫱🏻‍🫲🏼",quran:"📖",kindness:"🌿",prayer_Fajr:"🌅",prayer_Dhuhr:"☀️",prayer_Asr:"🌤️",prayer_Maghrib:"🌇",prayer_Isha:"🌙"};
  const descriptions={parents:"والدین کے ساتھ اچھا برتاؤ کریں یا ان کی خدمت کریں۔",charity:"اپنی استطاعت کے مطابق صدقہ کریں یا کسی کی مدد کریں۔",help:"کسی ایسے شخص کی مدد کریں جسے ضرورت ہو۔",quran:"قرآنِ پاک کی تلاوت کے لیے کچھ وقت نکالیں۔",kindness:"آج اپنی گفتگو اور رویّے میں نرمی اختیار کریں۔"};
- card.className="taskCard";card.innerHTML=`<div class="taskIcon">${icons[task.id]||"✨"}</div><div class="taskTitle">${task.label}</div><div class="taskDescription">${descriptions[task.id]||"آج اس نیک عمل کو اپنی زندگی کا حصہ بنائیں۔"}</div>`;
+ const isPrayer=task.type==="prayer";
+ card.className="taskCard";card.innerHTML=`<div class="taskIcon">${icons[task.id]||"✨"}</div><div class="taskTitle">${task.label}</div><div class="taskDescription">${isPrayer?"اپنے جواب کا انتخاب کریں۔":(descriptions[task.id]||"آج اس نیک عمل کو اپنی زندگی کا حصہ بنائیں۔")}</div>`;
  actions.hidden=false;step.textContent=`${completed+1}/${JOURNEY_GOODS.length}`;
- $("taskDone").onclick=()=>saveGoodDeed(task.id,true);
- $("taskLater").onclick=()=>{taskIndex++;renderTaskCard();};
+ $("taskDone").textContent=isPrayer?"جی، ادا کر لی":"✓ مکمل ہو گیا";
+ $("taskLater").textContent=isPrayer?"ابھی نہیں":"بعد میں";
+ $("taskDone").onclick=()=>isPrayer?savePrayerTask(task,true):saveGoodDeed(task.id,true);
+ $("taskLater").onclick=()=>isPrayer?savePrayerTask(task,false):(taskIndex++,renderTaskCard());
+}
+async function savePrayerTask(task,done){
+ if(!currentUser||!journeyData)return;
+ const eventKey=localDateKey()+"_"+task.prayerKey;
+ try{
+   await journeyRoot().child("current/prayers/"+safeKey(eventKey)).set(done?"yes":"no");
+   await journeyRoot().child("current/goodDeeds/"+task.id).set(true);
+   journeyData.prayers=journeyData.prayers||{};journeyData.prayers[safeKey(eventKey)]=done?"yes":"no";
+   journeyData.goodDeeds=journeyData.goodDeeds||{};journeyData.goodDeeds[task.id]=true;
+   taskIndex++;updateJourneyUI();renderTaskCard();
+ }catch(e){setJourneyMessage("نماز کا جواب محفوظ نہیں ہو سکا۔ دوبارہ کوشش کریں۔");}
 }
 async function saveGoodDeed(id,done){
  if(!currentUser||!journeyData)return;
@@ -993,67 +1008,19 @@ function recordJourneyZikr(item){
    updateJourneyUI();
  }).catch(e=>console.warn("Journey zikr update failed",e));
 }
-function renderPrayerList(){
- const box=$("prayerList");if(!box)return;
- if(!prayerTimings){box.innerHTML="";return;}
- box.innerHTML=PRAYERS.map(([key,label])=>{
-   const time=prayerTimings[key]||"--:--",answer=journeyData&&journeyData.prayers?journeyData.prayers[prayerDateKey+"_"+key]:"";
-   return `<div class="prayerItem ${answer?"answered":""}"><span>${label}</span><small>${time}</small><b>${answer==="yes"?"✓ ادا کی":answer==="no"?"✕ نہیں ادا کی":"—"}</b></div>`;
- }).join("");
-}
-async function loadPrayerTimes(){
- const label=$("prayerLocationText");label.textContent="مقام معلوم کیا جا رہا ہے…";
- if(!navigator.geolocation){label.textContent="اس براؤزر میں مقام کی سہولت دستیاب نہیں۔";return;}
- navigator.geolocation.getCurrentPosition(async pos=>{
-   try{
-     const lat=pos.coords.latitude,lon=pos.coords.longitude;
-     const date=new Date();prayerDateKey=localDateKey(date);
-     const dateArg=`${String(date.getDate()).padStart(2,"0")}-${String(date.getMonth()+1).padStart(2,"0")}-${date.getFullYear()}`;
-     const res=await fetch(`https://api.aladhan.com/v1/timings/${dateArg}?latitude=${lat}&longitude=${lon}&method=3`);
-     if(!res.ok)throw new Error("Prayer time service unavailable");
-     const json=await res.json();if(!json||json.code!==200)throw new Error("Invalid prayer time response");
-     prayerTimings=json.data.timings;
-     label.textContent="آج کے نماز کے اوقات آپ کے مقام کے مطابق ہیں۔";
-     renderPrayerList();checkPrayerPrompts();
-   }catch(e){label.textContent="نماز کے اوقات حاصل نہیں ہو سکے۔ دوبارہ کوشش کریں۔";console.warn(e);}
- },()=>{label.textContent="مقام کی اجازت نہیں ملی۔ اوقات کے لیے مقام کی اجازت دیں۔"},{enableHighAccuracy:false,timeout:12000,maximumAge:3600000});
-}
-function checkPrayerPrompts(){
- if(!currentUser||!journeyData||!journeyData.startAt||journeyData.ended||!prayerTimings)return;
- const now=new Date(),nowMins=now.getHours()*60+now.getMinutes();
- for(const [key,label] of PRAYERS){
-   const raw=String(prayerTimings[key]||"").slice(0,5),parts=raw.split(":").map(Number);
-   if(parts.length!==2||!Number.isFinite(parts[0])||!Number.isFinite(parts[1]))continue;
-   const prayerMins=parts[0]*60+parts[1],eventKey=prayerDateKey+"_"+key;
-   if(nowMins>=prayerMins&&!journeyData.prayers?.[eventKey]&&prayerPromptShown!==eventKey){
-     prayerPromptShown=eventKey;
-     const prompt=$("prayerPrompt");prompt.hidden=false;
-     prompt.innerHTML=`<strong>کیا آپ نے ${label} کی نماز ادا کر لی ہے؟</strong><div class="prayerAnswer"><button type="button" data-answer="yes">جی، ادا کر لی</button><button type="button" class="no" data-answer="no">ابھی نہیں</button></div>`;
-     prompt.querySelectorAll("[data-answer]").forEach(btn=>btn.addEventListener("click",()=>savePrayerAnswer(eventKey,btn.dataset.answer,label)));
-     break;
-   }
- }
-}
-async function savePrayerAnswer(eventKey,answer,label){
- if(!currentUser||!journeyData||!journeyData.startAt||journeyData.ended)return;
- try{
-   await journeyRoot().child("current/prayers/"+safeKey(eventKey)).set(answer);
-   journeyData.prayers=journeyData.prayers||{};journeyData.prayers[safeKey(eventKey)]=answer;
-   $("prayerPrompt").hidden=true;prayerPromptShown="";renderPrayerList();updateJourneyUI();
- }catch(e){setJourneyMessage("نماز کا جواب محفوظ نہیں ہو سکا۔ انٹرنیٹ چیک کریں۔");}
-}
-$("loadPrayerTimes").addEventListener("click",loadPrayerTimes);
 $("journeyStart").addEventListener("click",startJourney);
 renderGoodDeeds();
 db.ref(".info/serverTimeOffset").on("value",s=>{serverOffset=Number(s.val()||0);});
 auth.onAuthStateChanged(user=>{
  if(user){
-   ensureJourney().then(()=>{renderPrayerList();checkPrayerPrompts();if(!prayerTimings)loadPrayerTimes();}).catch(e=>{console.error("Journey load failed",e);setJourneyMessage("سفر کا ریکارڈ لوڈ نہیں ہو سکا: "+(e&&e.code?e.code:(e&&e.message?e.message:"نامعلوم خرابی")));});
+   ensureJourney().catch(e=>{console.error("Journey load failed",e);setJourneyMessage("سفر کا ریکارڈ لوڈ نہیں ہو سکا: "+(e&&e.code?e.code:(e&&e.message?e.message:"نامعلوم خرابی")));});
  }
- else{journeyData=null;$("journeyTimer").textContent="لاگ اِن درکار";$("prayerPrompt").hidden=true;$("taskCard").innerHTML="<div class=\"taskIcon\">🔐</div><div class=\"taskTitle\">آپ کا اکاؤنٹ درکار ہے</div><div class=\"taskDescription\">پہلے index.html میں لاگ اِن کریں، پھر یہاں واپس آئیں۔ آپ کا لاگ اِن خود بخود پہچان لیا جائے گا۔</div>";$("taskActions").hidden=true;}
+ else{
+   journeyData=null;$("journeyTimer").textContent="لاگ اِن درکار";$("taskActions").hidden=true;
+   $("taskCard").innerHTML="<div class=\"taskIcon\">🔐</div><div class=\"taskTitle\">آپ کا اکاؤنٹ درکار ہے</div><div class=\"taskDescription\">پہلے ایپ میں لاگ اِن کریں، پھر یہاں واپس آئیں۔</div>";
+ }
 });
-journeyTimerHandle=setInterval(()=>{if(journeyData&&journeyData.startAt&&!journeyData.ended)updateJourneyUI();checkPrayerPrompts();},1000);
-setInterval(()=>{if(prayerTimings&&prayerDateKey!==localDateKey())loadPrayerTimes();},60000);
+journeyTimerHandle=setInterval(()=>{if(journeyData&&journeyData.startAt&&!journeyData.ended)updateJourneyUI();},1000);
 
 // Close only this immersive experience and return to the app's previous screen.
 // Firebase LOCAL persistence is intentionally retained so reopening auto-signs in.
