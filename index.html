@@ -3998,8 +3998,11 @@ function switchBottomTab(tabName, fromHistory = false) {
             ? `<button class="unpaid-btn" onclick="togglePaymentStatus('${w.date}', '${w.uid}', 'Pending')">نامکمل (Unpaid) کریں</button>`
             : `<button class="paid-btn" onclick="togglePaymentStatus('${w.date}', '${w.uid}', 'Paid')">ادائی (Paid) مارک کریں</button>`;
           return `<div class="admin-card" data-admin-winner-index="${index}">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <b>📅 ${w.date}</b>${badgeHtml}
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap;">
+                <b>📅 ${w.date}</b>
+                <button type="button" class="admin-copy-winner-btn" onclick="copyAdminWinnerMessage('${w.date}', ${Number(w.count || 0)})" style="padding:5px 10px;border:1px solid #c5a059;border-radius:7px;background:#fdf8ee;color:#0d3b22;font-size:11px;font-weight:700;cursor:pointer;">کاپی کریں</button>
+              </div>${badgeHtml}
             </div>
             <div style="margin-top:4px;"><b>فاتح:</b> ${w.name || 'صارف'} (${Number(w.count || 0)} درود)</div>
             <div><b>اکاؤنٹ:</b> <span class="admin-account-detail">تفصیلات لوڈ ہو رہی ہیں...</span></div>
@@ -4030,6 +4033,31 @@ function switchBottomTab(tabName, fromHistory = false) {
         container.innerHTML = "<div style='font-size:12px; color:#ef4444;'>Admin ڈیٹا لوڈ نہیں ہو سکا۔</div>";
       });
     }
+
+    // Copy the exact congratulation message with this winner's own date and count.
+    window.copyAdminWinnerMessage = async function(date, count) {
+      const message = `**${date}** آپ نے محفلِ درود کے مقابلے میں **${Number(count || 0)} درود پڑھ کر** بہترین کارکردگی کا مظاہرہ کیا ہے۔\n**محفلِ درود کی جانب سے آپ کو بہت بہت مبارک ہو!** 🎉`;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(message);
+        } else {
+          const field = document.createElement('textarea');
+          field.value = message;
+          field.setAttribute('readonly', '');
+          field.style.position = 'fixed';
+          field.style.opacity = '0';
+          document.body.appendChild(field);
+          field.select();
+          const copied = document.execCommand('copy');
+          field.remove();
+          if (!copied) throw new Error('Clipboard copy was not available');
+        }
+        alert('فاتح کا مبارکباد والا پیغام کاپی ہو گیا ہے۔');
+      } catch (error) {
+        console.error('Winner message copy failed:', error);
+        alert('پیغام کاپی نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔');
+      }
+    };
 
     function togglePaymentStatus(dateKey, winnerUid, newStatus) {
       db.ref(`competitions/${dateKey}/${winnerUid}`).update({
