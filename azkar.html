@@ -160,6 +160,7 @@ button:disabled{opacity:.45}
 html,body{background:#07110f}
 .page{width:100%;max-width:none;margin:0}.sheet{width:100%;min-height:100vh;border:0;border-radius:0;overflow:visible}.top,.mainTitle,.subTitle{display:none!important}
 .journeyWrap{position:relative;width:100%;height:100svh;min-height:590px;margin:0;padding:0;border:0;border-radius:0;background:#07110f;box-shadow:none;overflow:hidden;isolation:isolate}
+.journeyClose{position:absolute;z-index:30;top:max(12px,env(safe-area-inset-top));right:12px;min-width:76px;padding:9px 13px;border:1px solid rgba(255,239,194,.9);border-radius:22px;background:rgba(12,35,27,.82);color:#fff8e7;font:700 13px Tahoma,serif;box-shadow:0 3px 12px #0006;backdrop-filter:blur(5px);cursor:pointer}.journeyClose:active{transform:scale(.97)}
 .journeyHeading{position:absolute;z-index:8;top:max(14px,env(safe-area-inset-top));left:0;right:0;margin:0;text-align:center;color:#fff5d9;font-size:15px;font-weight:800;letter-spacing:.3px;text-shadow:0 2px 12px #000}
 .journeyScene{position:absolute;inset:0;height:100%;border-radius:0;background:linear-gradient(#101b2b,#b48b65 65%,#243d30);overflow:hidden;box-shadow:none}
 #journey3d{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
@@ -224,6 +225,7 @@ html,body{background:#07110f}
 
   <section class="journeyWrap" id="journeyWrap">
     <div class="journeyScene" id="journeyScene" aria-label="تھرڈ پرسن 3D گیم کا منظر: ایک مسافر راستے پر آگے بڑھ رہا ہے">
+      <button type="button" class="journeyClose" id="journeyClose" aria-label="بند کریں">✕ بند کریں</button>
       <canvas id="journey3d"></canvas>
       <div class="journeyHeading">میرا 24 گھنٹے کا سفر</div>
       <div class="journeyStats">
@@ -1045,6 +1047,18 @@ auth.onAuthStateChanged(user=>{
 });
 journeyTimerHandle=setInterval(()=>{if(journeyData&&journeyData.startAt&&!journeyData.ended)updateJourneyUI();checkPrayerPrompts();},1000);
 setInterval(()=>{if(prayerTimings&&prayerDateKey!==localDateKey())loadPrayerTimes();},60000);
+
+// Close only this immersive experience and return to the app's previous screen.
+// Firebase LOCAL persistence is intentionally retained so reopening auto-signs in.
+$("journeyClose").addEventListener("click",()=>{
+  try{stopVoice();}catch(e){console.warn("Voice stop:",e);}
+  try{if(journey3D.raf)cancelAnimationFrame(journey3D.raf);}catch(e){}
+  const ref=document.referrer;
+  if(ref){
+    try{const u=new URL(ref);if(u.origin===location.origin){history.back();return;}}catch(e){}
+  }
+  location.href="index.html";
+});
 
 initJourney3D();
 loadLocalProgress();
