@@ -154,12 +154,99 @@ button:disabled{opacity:.45}
 .leaderMineCount{font-size:20px;color:#075a43;min-width:36px;text-align:center}
 </style>
 
+
+<style>
+/* Full-screen third-person adventure scene: no cards or boxed dashboard */
+html,body{background:#07110f}
+.page{width:100%;max-width:none;margin:0}.sheet{width:100%;min-height:100vh;border:0;border-radius:0;overflow:visible}.top,.mainTitle,.subTitle{display:none!important}
+.journeyWrap{position:relative;width:100%;height:100svh;min-height:590px;margin:0;padding:0;border:0;border-radius:0;background:#07110f;box-shadow:none;overflow:hidden;isolation:isolate}
+.journeyHeading{position:absolute;z-index:8;top:max(14px,env(safe-area-inset-top));left:0;right:0;margin:0;text-align:center;color:#fff5d9;font-size:15px;font-weight:800;letter-spacing:.3px;text-shadow:0 2px 12px #000}
+.journeyScene{position:absolute;inset:0;height:100%;border-radius:0;background:linear-gradient(#101b2b,#b48b65 65%,#243d30);overflow:hidden;box-shadow:none}
+#journey3d{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+.journeyScene.webgl-ready{background:#152a29}
+.sceneCaption{position:absolute;z-index:4;bottom:29%;left:0;right:0;text-align:center;color:#fff7df;font-size:12px;font-weight:700;letter-spacing:.2px;text-shadow:0 2px 10px #000;pointer-events:none}
+.journeyStats{position:absolute;z-index:9;top:max(48px,calc(env(safe-area-inset-top) + 38px));left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;margin:0;color:#fff;text-shadow:0 2px 8px #000}
+.journeyStats div{display:flex;flex-direction:column;gap:2px;min-width:86px}.journeyStats small{font-size:11px;color:#f8ebcc}.journeyStats strong{font-size:17px;color:#fff;direction:ltr;font-variant-numeric:tabular-nums}
+.journeyTrack{position:absolute;z-index:9;top:max(94px,calc(env(safe-area-inset-top) + 83px));left:15px;right:15px;height:5px;border:0;border-radius:20px;background:#ffffff55;overflow:hidden}.journeyTrack span{display:block;width:0;height:100%;background:linear-gradient(90deg,#b7d68d,#fff0b2);border-radius:20px;transition:width .7s}
+.journeyNote{position:absolute;z-index:10;top:max(108px,calc(env(safe-area-inset-top) + 97px));left:14px;right:14px;text-align:center;font-size:11px;line-height:1.55;color:#fff4d8;text-shadow:0 2px 8px #000;pointer-events:none}
+.dailyTasks{position:absolute;z-index:12;left:0;right:0;bottom:max(24px,env(safe-area-inset-bottom));margin:0;padding:0 18px;border:0;border-radius:0;background:linear-gradient(0deg,#07130fdd 0%,#07130f88 65%,transparent 100%);box-shadow:none;color:#fff;text-align:center;padding-top:48px;padding-bottom:12px}
+#journeyStart{width:auto!important;max-width:90%;margin:0 auto 12px!important;padding:12px 24px;border:1px solid #f5dfaa;border-radius:30px;background:linear-gradient(135deg,#f4d993,#b98c3d);color:#18291f;font-size:15px;font-weight:900;box-shadow:0 5px 20px #0007}
+.taskTopline{display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;font-weight:800;font-size:12px;margin:0 0 5px;text-shadow:0 2px 8px #000}
+.taskStep{color:#f5d88e;font-size:11px}
+.taskCard{position:relative;min-height:0;padding:5px 10px 7px;border:0;border-radius:0;text-align:center;color:#fff;background:transparent;box-shadow:none;overflow:visible}
+.taskCard:before,.taskCard:after{display:none}
+.taskIcon{font-size:26px;margin:0 0 2px;filter:drop-shadow(0 2px 5px #000)}
+.taskTitle{font-size:clamp(20px,5vw,27px);font-weight:900;line-height:1.5;color:#fff8e6;text-shadow:0 2px 10px #000}
+.taskDescription{font-size:13px;line-height:1.65;color:#fff1d5;margin-top:2px;text-shadow:0 2px 8px #000}
+.taskActions{display:flex;justify-content:center;gap:10px;margin-top:10px}
+.taskActions button{min-width:125px;border-radius:24px;padding:10px 18px;font-size:13px;box-shadow:0 4px 12px #0007}
+.taskDone{background:#e8d08e;color:#18382a;border:1px solid #fff0c5}.taskLater{background:#162b26cc;color:#fff;border:1px solid #e9d6a4}
+.taskFinish{padding:8px 4px;text-align:center;border:0;border-radius:0;background:transparent;color:#fff5dc;line-height:1.8;font-weight:800;text-shadow:0 2px 8px #000}
+.prayerLocation{display:flex;align-items:center;justify-content:center;gap:8px;margin:7px auto 0;color:#fff;font-size:10px;text-shadow:0 2px 8px #000}.prayerLocation button{font-size:11px;padding:6px 12px;background:#173c2f;color:white;border:1px solid #e5d29c;border-radius:18px;white-space:nowrap}
+.prayerList{display:none}.prayerPrompt{background:#142e25ee;border:1px solid #d7c18b;border-radius:16px;padding:12px;margin:8px auto 0;max-width:340px;text-align:center;color:#fff}.prayerPrompt strong{display:block;margin-bottom:7px;color:#fff5dc}.prayerAnswer{display:flex;justify-content:center;gap:10px}.prayerAnswer button{font-size:12px;padding:7px 12px;background:#075b43;color:white;border-radius:18px}.prayerAnswer button.no{background:#fffdf5;color:#5c342b}
+.goodDeeds{display:none}
+@media(max-width:600px){.journeyWrap{height:100svh;min-height:560px}.journeyHeading{font-size:14px}.journeyStats strong{font-size:16px}.sceneCaption{bottom:32%}.dailyTasks{padding-left:12px;padding-right:12px;padding-top:42px}.taskTitle{font-size:21px}.taskDescription{font-size:12px}.taskActions button{min-width:112px;padding:9px 14px}.prayerLocation{font-size:9px}}
+@media(min-width:700px){.journeyWrap{height:100svh}.journeyHeading{font-size:18px}.dailyTasks{max-width:760px;left:50%;right:auto;width:100%;transform:translateX(-50%)}.journeyStats{left:calc(50% - 350px);right:calc(50% - 350px)}.journeyTrack{left:calc(50% - 350px);right:calc(50% - 350px)}.journeyNote{left:calc(50% - 350px);right:calc(50% - 350px)}}
+</style>
+
+
+<style>
+/* Remove the old below-the-scene Azkar layout from the visible screen. Keep its
+   elements in the document so existing Firebase/voice/counting code does not
+   fail while the new immersive journey remains the only visible experience. */
+.sheet > .card,
+.sheet > .status,
+.sheet > .buttons,
+.sheet > .backBar,
+.sheet > .leaderboardTab{display:none!important}
+.sheet{padding:0!important;margin:0!important;background:transparent!important}
+/* Final cinematic presentation: immersive natural world, no dashboard cards */
+.journeyWrap{background:#8fae9d!important}
+.journeyScene{background:#9eb9bd!important}
+.journeyHeading,.journeyStats,.journeyNote,.sceneCaption{text-shadow:0 2px 10px rgba(0,0,0,.88),0 0 18px rgba(0,0,0,.45)}
+.journeyHeading{font-size:16px;letter-spacing:.5px}
+.journeyStats{padding:8px 12px;border-radius:18px;background:linear-gradient(90deg,rgba(7,25,20,.48),rgba(7,25,20,.12));backdrop-filter:blur(3px)}
+.journeyTrack{height:4px;background:rgba(255,255,255,.42)}
+.dailyTasks{background:linear-gradient(0deg,rgba(5,19,14,.94),rgba(5,19,14,.70) 68%,transparent);backdrop-filter:blur(2px);padding-bottom:max(16px,env(safe-area-inset-bottom))}
+.taskTitle{font-size:clamp(21px,5.4vw,29px);letter-spacing:.1px}
+.taskDescription{max-width:520px;margin:4px auto 0;font-size:14px}
+#journeyStart,.taskActions button{min-height:44px}
+#journeyStart{box-shadow:0 5px 18px rgba(0,0,0,.35)}
+/* Azkar reading, navigation and leaderboard remain available below the journey. */
+@media(max-width:600px){.journeyWrap{height:100svh;min-height:600px}.journeyHeading{font-size:14px}.journeyStats{left:10px;right:10px}.taskDescription{font-size:12px;max-width:330px}}
+</style>
 </head>
 <body>
 <div class="page"><div class="sheet">
   <div class="top"><div class="mosques">♜♜♜♜♜♜♜</div></div>
   <div class="mainTitle">روزانہ کے اذکار اور دعائیں</div>
   <div class="subTitle">اللہ کی یاد، سکونِ قلب</div>
+
+  <section class="journeyWrap" id="journeyWrap">
+    <div class="journeyScene" id="journeyScene" aria-label="تھرڈ پرسن 3D گیم کا منظر: ایک مسافر راستے پر آگے بڑھ رہا ہے">
+      <canvas id="journey3d"></canvas>
+      <div class="journeyHeading">میرا 24 گھنٹے کا سفر</div>
+      <div class="journeyStats">
+        <div><small>باقی وقت</small><strong id="journeyTimer">لوڈ ہو رہا ہے…</strong></div>
+        <div><small>سفر کی پیش رفت</small><strong id="journeyPercent">0%</strong></div>
+      </div>
+      <div class="journeyTrack"><span id="journeyProgress"></span></div>
+      <div class="journeyNote" id="journeyNote">آپ کا ذاتی سفر اور ریکارڈ محفوظ رہے گا۔</div>
+      <div class="sceneCaption">ہر نیک قدم، روشنی کی طرف ایک قدم</div>
+      <section class="dailyTasks" id="dailyTasks">
+        <button type="button" id="journeyStart" class="taskDone">🌅 اپنا 24 گھنٹے کا سفر شروع کریں</button>
+        <div class="taskTopline"><span>اگلا نیک عمل</span><span class="taskStep" id="taskStep">تیاری ہو رہی ہے…</span></div>
+        <div id="taskCard" class="taskCard"><div class="taskIcon">✨</div><div class="taskTitle">آپ کا روزانہ کا سفر</div><div class="taskDescription">اپنا پہلا کام حاصل کرنے کے لیے انتظار کریں۔</div></div>
+        <div class="taskActions" id="taskActions" hidden>
+          <button type="button" class="taskDone" id="taskDone">✓ مکمل ہو گیا</button>
+          <button type="button" class="taskLater" id="taskLater">بعد میں</button>
+        </div>
+        <div class="prayerLocation"><span id="prayerLocationText">نماز کے اوقات حاصل کرنے کے لیے مقام کی اجازت دیں۔</span><button type="button" id="loadPrayerTimes">نماز کے اوقات</button></div>
+        <div id="prayerList" class="prayerList"></div><div id="prayerPrompt" class="prayerPrompt" hidden></div>
+        <div id="goodDeeds" class="goodDeeds"></div>
+      </section>
+    </div>
+  </section>
 
   <main class="card">
     <div class="zikrHeader">
@@ -194,6 +281,7 @@ button:disabled{opacity:.45}
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
 // Keep the Azkar page awake for the whole time it is visible.
@@ -272,6 +360,8 @@ const firebaseConfig={
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.database();
+// Reuse the same Firebase LOCAL auth session created by index.html.
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(err=>console.warn("Auth persistence:",err));
 
 const ITEMS=[{"type": "ذکر", "no": 1, "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ سُبْحَانَ اللَّهِ الْعَظِيمِ", "translation": "اللہ پاک ہے اور اسی کی حمد ہے، اللہ بہت پاک ہے۔", "target": 1}, {"type": "ذکر", "no": 2, "arabic": "سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَاللَّهُ أَكْبَرُ", "translation": "اللہ پاک ہے، تمام تعریفیں اللہ کے لیے ہیں، اور اللہ سب سے بڑا ہے۔", "target": 1}, {"type": "ذکر", "no": 3, "arabic": "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ", "translation": "کوئی طاقت اور قوت نہیں اللہ کے سوا، جو بلند اور بہت بڑا ہے۔", "target": 1}, {"type": "ذکر", "no": 4, "arabic": "لَا إِلٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ", "translation": "اے اللہ کے سوا کوئی معبود نہیں، تو پاک ہے، میں واقعی ظالموں میں سے ہوں۔", "target": 1}, {"type": "ذکر", "no": 5, "arabic": "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ", "translation": "اللہ ہمارے لیے کافی ہے، اور وہ بہترین کارساز ہے۔", "target": 1}, {"type": "ذکر", "no": 6, "arabic": "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ", "translation": "اے ہمیشہ زندہ اور قائم رہنے والے! میں تیری رحمت کا طلبگار ہوں۔", "target": 1}, {"type": "ذکر", "no": 7, "arabic": "أَسْتَغْفِرُ اللَّهَ رَبِّي مِنْ كُلِّ ذَنْبٍ وَأَتُوبُ إِلَيْهِ", "translation": "میں اپنے رب اللہ سے ہر گناہ کی بخشش مانگتا ہوں اور اس کی طرف رجوع کرتا ہوں۔", "target": 1}, {"type": "ذکر", "no": 8, "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ", "translation": "اللہ پاک ہے اور اسی کی حمد ہے، اس کی مخلوق کی گنتی کے برابر، اس کی رضا کے برابر، اس کے عرش کے وزن کے برابر، اور اس کے کلمات کی سیاہی کے برابر۔", "target": 1}, {"type": "ذکر", "no": 9, "arabic": "لَا إِلٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ", "translation": "اللہ کے سوا کوئی معبود نہیں، وہ اکیلا ہے، اس کا کوئی شریک نہیں، اس کا بادشاہت ہے، اس کی حمد ہے، اور وہ ہر چیز پر قادر ہے۔", "target": 1}, {"type": "ذکر", "no": 10, "arabic": "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ", "translation": "اے اللہ! محمد ﷺ اور ان کی آل پر رحمت نازل فرما، جیسے تو نے ابراہیمؑ اور ان کی آل پر رحمت نازل فرمائی، بے شک تو حمد و مجد والا ہے۔ اے اللہ! محمد ﷺ اور ان کی آل پر برکت نازل فرما، جیسے تو نے ابراہیمؑ اور ان کی آل پر برکت نازل فرمائی، بے شک تو حمد و مجد والا ہے۔", "target": 1}, {"type": "آیت الکرسی", "no": 11, "arabic": "اللَّهُ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ  لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ", "translation": "اللہ، اس کے سوا کوئی معبود نہیں، وہ زندہ اور سب کو قائم رکھنے والا ہے۔ اسے نہ اونگھ آتی ہے نہ نیند۔ جو کچھ آسمانوں اور زمین میں ہے سب اسی کا ہے۔ کون ہے جو اس کے پاس اس کی اجازت کے بغیر سفارش کرے؟ وہ جانتا ہے جو ان کے آگے اور پیچھے ہے، اور وہ اس کے علم میں سے اتنا ہی جان سکتے ہیں جتنا وہ چاہے۔ اس کی کرسی آسمانوں اور زمین کو گھیرے ہوئے ہے، اور ان دونوں کی حفاظت اسے نہیں تھکاتی، اور وہ بلند، عظمت والا ہے۔", "target": 1}];
 let current=0;
@@ -488,6 +578,7 @@ function complete(){
 
   // Firebase saving must never block the voice/counting system.
   saveReadingToFirebase(item).catch(()=>{});
+  recordJourneyZikr(item);
 
   if(counts[itemIndex]>=item.target){
     $("status").textContent="🎉 ہدف مکمل — اگلا ذکر خود کھل رہا ہے…";
@@ -715,10 +806,251 @@ auth.onAuthStateChanged(user=>{
  }
 });
 
+
+
+// Genuine real-time 3D scene: a walking human character, a winding path,
+// a symbolic shadowed side and a softly illuminated garden side.
+let journey3D={renderer:null,scene:null,camera:null,person:null,leftLeg:null,rightLeg:null,leftArm:null,rightArm:null,clock:null,progress:0,raf:0};
+function make3DPerson(){
+ const T=THREE,group=new T.Group();
+ const robe=new T.MeshStandardMaterial({color:0x3d6655,roughness:.94}),robeShade=new T.MeshStandardMaterial({color:0x29483d,roughness:1}),skin=new T.MeshStandardMaterial({color:0x9c684b,roughness:.92}),cloth=new T.MeshStandardMaterial({color:0xd8c9a5,roughness:1}),shoe=new T.MeshStandardMaterial({color:0x302b27,roughness:1});
+ // Natural proportions, layered clothing and a wrapped head covering.
+ const body=new T.Mesh(new T.CapsuleGeometry(.34,.72,8,14),robe);body.position.y=1.42;body.scale.set(.88,1.05,.72);group.add(body);
+ const lowerRobe=new T.Mesh(new T.CylinderGeometry(.36,.53,.72,18,2),robeShade);lowerRobe.position.y=.83;group.add(lowerRobe);
+ for(let i=0;i<7;i++){const seam=new T.Mesh(new T.BoxGeometry(.012,.62,.012),cloth);seam.position.set(-.22+i*.073,1.05,.255);group.add(seam);}
+ const neck=new T.Mesh(new T.CylinderGeometry(.105,.12,.18,12),skin);neck.position.y=1.98;group.add(neck);
+ const head=new T.Mesh(new T.SphereGeometry(.205,24,20),skin);head.position.set(0,2.17,0);head.scale.set(.9,1.12,.92);group.add(head);
+ const cap=new T.Mesh(new T.SphereGeometry(.214,24,12,0,Math.PI*2,0,Math.PI*.48),cloth);cap.position.set(0,2.24,-.005);group.add(cap);
+ const scarf=new T.Mesh(new T.TorusGeometry(.205,.045,8,24),cloth);scarf.rotation.x=Math.PI/2;scarf.position.y=2.12;group.add(scarf);
+ const legGeo=new T.CapsuleGeometry(.105,.43,5,10),leftLeg=new T.Group(),rightLeg=new T.Group();
+ leftLeg.position.set(-.16,.65,0);rightLeg.position.set(.16,.65,0);
+ for(const [g,x] of [[leftLeg,-.16],[rightLeg,.16]]){const leg=new T.Mesh(legGeo,robeShade);leg.position.y=-.22;g.add(leg);const foot=new T.Mesh(new T.BoxGeometry(.19,.12,.34),shoe);foot.position.set(0,-.52,.1);g.add(foot);group.add(g);}
+ const armGeo=new T.CapsuleGeometry(.085,.43,5,10),leftArm=new T.Group(),rightArm=new T.Group();
+ leftArm.position.set(-.34,1.72,0);rightArm.position.set(.34,1.72,0);
+ for(const g of [leftArm,rightArm]){const sleeve=new T.Mesh(armGeo,robe);sleeve.position.y=-.23;g.add(sleeve);const hand=new T.Mesh(new T.SphereGeometry(.075,12,10),skin);hand.position.y=-.49;g.add(hand);group.add(g);}
+ group.scale.setScalar(1.05);return {group,leftLeg,rightLeg,leftArm,rightArm};
+}
+function initJourney3D(){
+ const canvas=$("journey3d");if(!canvas||!window.THREE)return;
+ try{
+  const T=THREE,scene=new T.Scene();scene.background=new T.Color(0x9eb9bd);scene.fog=new T.FogExp2(0xa9bdb5,.012);
+  const camera=new T.PerspectiveCamera(57,1,.1,180);camera.position.set(0,3.4,10);camera.lookAt(0,1,-7);
+  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
+  scene.add(new T.HemisphereLight(0xe5f2f3,0x53604b,1.8));
+  const sun=new T.DirectionalLight(0xffe4bd,2.35);sun.position.set(-12,22,10);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-24;sun.shadow.camera.right=24;sun.shadow.camera.top=24;sun.shadow.camera.bottom=-24;scene.add(sun);
+  const fill=new T.DirectionalLight(0xc5dfd3,.65);fill.position.set(12,8,-18);scene.add(fill);
+  const groundMat=new T.MeshStandardMaterial({color:0x55734e,roughness:1});const ground=new T.Mesh(new T.PlaneGeometry(180,180),groundMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
+  // Gentle rolling green banks around a winding earth-and-stone footpath.
+  const pathMat=new T.MeshStandardMaterial({color:0xb6a17c,roughness:1}),stoneMat=new T.MeshStandardMaterial({color:0x8d8068,roughness:1});
+  for(let i=0;i<38;i++){const z=8-i*2.35,x=Math.sin(i*.19)*1.2;const slab=new T.Mesh(new T.BoxGeometry(3.5+Math.sin(i)*.25,.055,2.5),i%3===0?stoneMat:pathMat);slab.position.set(x,-.025,z);slab.rotation.y=Math.sin(i*.2)*.07;slab.receiveShadow=true;scene.add(slab);}
+  const hillMat=new T.MeshStandardMaterial({color:0x6e8a66,roughness:1});
+  for(let side of [-1,1])for(let i=0;i<7;i++){const hill=new T.Mesh(new T.SphereGeometry(1,18,12),hillMat);hill.scale.set(5+i*.5,1.3+i*.18,8);hill.position.set(side*(9+i*.8),-.7,-8-i*8);scene.add(hill);}
+  const trunkMat=new T.MeshStandardMaterial({color:0x594735,roughness:1}),leafMats=[0x456f4d,0x527e53,0x638c5d,0x789a65].map(c=>new T.MeshStandardMaterial({color:c,roughness:1}));
+  // Dense, varied trees with layered foliage on both sides of the path.
+  for(let i=0;i<48;i++){
+   const side=i%2?1:-1,z=7-Math.floor(i/2)*3.15,x=side*(4.6+(i%4)*1.05);
+   const h=2.7+(i%5)*.34;const trunk=new T.Mesh(new T.CylinderGeometry(.12,.22,h,10),trunkMat);trunk.position.set(x,h/2-.08,z);trunk.castShadow=true;scene.add(trunk);
+   for(let j=0;j<5;j++){const crown=new T.Mesh(new T.IcosahedronGeometry(.8+(j%2)*.22,2),leafMats[(i+j)%leafMats.length]);crown.position.set(x+Math.sin(j*2+i)*.28,h*.68+j*.35,z+Math.cos(j*2+i)*.25);crown.scale.set(1.15,.92,1);crown.castShadow=true;scene.add(crown);}
+  }
+  // Wildflowers and small shrubs add foreground depth and natural detail.
+  const flowerMats=[0xe9d8a1,0xd7a9a0,0xe9e4c8].map(c=>new T.MeshStandardMaterial({color:c,roughness:.9}));
+  for(let i=0;i<110;i++){const side=i%2?1:-1,z=8-(i*1.73)%68,x=side*(2.8+(i%5)*.65);const stem=new T.Mesh(new T.CylinderGeometry(.018,.025,.32,5),trunkMat);stem.position.set(x,.14,z);scene.add(stem);const bloom=new T.Mesh(new T.SphereGeometry(.09,8,7),flowerMats[i%3]);bloom.position.set(x,.34,z);scene.add(bloom);}
+  // A quiet stream, wooden footbridge and warm lanterns in the distance.
+  const water=new T.Mesh(new T.PlaneGeometry(2.2,65),new T.MeshStandardMaterial({color:0x679b9b,roughness:.24,metalness:.08,transparent:true,opacity:.82}));water.rotation.x=-Math.PI/2;water.position.set(7,-.04,-25);scene.add(water);
+  const bridge=new T.Mesh(new T.BoxGeometry(3.3,.18,1.3),new T.MeshStandardMaterial({color:0x76563c,roughness:1}));bridge.position.set(5.8,.12,-15);bridge.rotation.y=-.12;scene.add(bridge);
+  for(let i=0;i<8;i++){const z=4-i*8;const post=new T.Mesh(new T.CylinderGeometry(.045,.06,1.45,8),trunkMat);post.position.set(i%2?2.8:-2.8,.72,z);scene.add(post);const lamp=new T.PointLight(0xffd79a,.48,7);lamp.position.set(i%2?2.8:-2.8,1.55,z);scene.add(lamp);const bulb=new T.Mesh(new T.SphereGeometry(.09,10,8),new T.MeshBasicMaterial({color:0xffe3ad}));bulb.position.copy(lamp.position);scene.add(bulb);}
+  // Distant birds and soft clouds, moving slowly across the sky.
+  const cloudMat=new T.MeshStandardMaterial({color:0xe7eeee,roughness:1});for(let i=0;i<12;i++){const cloud=new T.Group();for(let j=0;j<4;j++){const puff=new T.Mesh(new T.SphereGeometry(.8+j*.12,12,9),cloudMat);puff.position.set(j*.7,.15*(j%2),0);puff.scale.y=.55;cloud.add(puff);}cloud.position.set(-25+i*5,12+(i%3)*1.3,-38-(i%4)*9);cloud.userData.drift=.12+(i%3)*.035;scene.add(cloud);}
+  const person=make3DPerson();person.group.position.set(0,0,3.8);person.group.rotation.y=Math.PI;person.group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});scene.add(person.group);
+  journey3D={...journey3D,renderer,scene,camera,person:person.group,leftLeg:person.leftLeg,rightLeg:person.rightLeg,leftArm:person.leftArm,rightArm:person.rightArm,clock:new T.Clock()};
+  $("journeyScene").classList.add("webgl-ready");resizeJourney3D();window.addEventListener("resize",resizeJourney3D);animateJourney3D();
+ }catch(e){console.warn("3D journey scene unavailable",e);}
+}
+function resizeJourney3D(){const r=journey3D.renderer,c=$("journey3d");if(!r||!c)return;const w=c.clientWidth||320,h=c.clientHeight||260;r.setSize(w,h,false);journey3D.camera.aspect=w/h;journey3D.camera.updateProjectionMatrix();}
+function updateJourney3D(pct){journey3D.progress=Math.max(0,Math.min(100,Number(pct)||0));}
+function animateJourney3D(){
+ const j=journey3D;if(!j.renderer)return;j.raf=requestAnimationFrame(animateJourney3D);const t=j.clock.getElapsedTime(),walk=j.person&&journeyData&&journeyData.startAt&&!journeyData.ended;
+ if(j.person){const stride=walk?1:0;j.leftLeg.rotation.x=Math.sin(t*4.2)*.38*stride;j.rightLeg.rotation.x=-Math.sin(t*4.2)*.38*stride;j.leftArm.rotation.x=-Math.sin(t*4.2)*.22*stride;j.rightArm.rotation.x=Math.sin(t*4.2)*.22*stride;j.person.position.z=3.8-j.progress*.11;j.person.position.y=Math.abs(Math.sin(t*4.2))*.025*stride;j.person.rotation.y=Math.PI+Math.sin(t*.7)*.018*stride;j.camera.position.x=Math.sin(t*.65)*.035*stride;j.camera.position.z=j.person.position.z+6.8;j.camera.position.y=3.25+Math.sin(t*4.2)*.018*stride;j.camera.lookAt(0,1.15,j.person.position.z-7.5);}
+ if(j.scene){j.scene.children.forEach(o=>{if(o.userData&&o.userData.drift)o.position.x+=o.userData.drift*.002;});}
+ j.renderer.render(j.scene,j.camera);
+}
+
+// ---------------- 24-hour personal journey (Firebase per authenticated UID) ----------------
+const JOURNEY_GOODS=[
+  {id:"parents",label:"والدین کی خدمت"},
+  {id:"charity",label:"صدقہ یا کسی کی مدد"},
+  {id:"help",label:"کسی ضرورت مند کی مدد"},
+  {id:"quran",label:"قرآنِ پاک کی تلاوت"},
+  {id:"kindness",label:"اچھا اخلاق اور نرم گفتگو"}
+];
+const PRAYERS=[["Fajr","فجر"],["Dhuhr","ظہر"],["Asr","عصر"],["Maghrib","مغرب"],["Isha","عشاء"]];
+let journeyData=null,journeyTimerHandle=null,prayerTimings=null,prayerDateKey="",prayerPromptShown="",journeyRotating=false;
+let serverOffset=0;
+let prayerEvents=[];
+const journeyRoot=()=>currentUser?db.ref("dailyJourney/"+currentUser.uid):null;
+function journeyNow(){return Date.now()+serverOffset;}
+function localDateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+function safeKey(s){return String(s).replace(/[.#$/\[\]]/g,"_");}
+function setJourneyMessage(msg){const e=$("journeyNote");if(e)e.textContent=msg;}
+let taskIndex=0;
+function renderGoodDeeds(){renderTaskCard();}
+function renderTaskCard(){
+ const card=$("taskCard"),actions=$("taskActions"),step=$("taskStep");if(!card)return;
+ const completed=JOURNEY_GOODS.filter(x=>journeyData&&journeyData.goodDeeds&&journeyData.goodDeeds[x.id]).length;
+ while(taskIndex<JOURNEY_GOODS.length && journeyData&&journeyData.goodDeeds&&journeyData.goodDeeds[JOURNEY_GOODS[taskIndex].id])taskIndex++;
+ if(!journeyData||!journeyData.startAt||journeyData.ended){card.className="taskFinish";card.textContent=journeyData&&journeyData.ended?"آج کا سفر مکمل ہو چکا ہے۔ اگلا سفر آپ خود شروع کر سکتے ہیں۔":"سفر شروع کرنے کے بعد آپ کا پہلا کام یہاں آئے گا۔";actions.hidden=true;step.textContent="—";return;}
+ if(taskIndex>=JOURNEY_GOODS.length){card.className="taskFinish";card.innerHTML="🌟 ماشاءاللہ! آج کے تمام اضافی نیک اعمال درج ہو گئے۔<br>اذکار جاری رکھیں اور اپنے اگلے نماز کے سوال کا انتظار کریں۔";actions.hidden=true;step.textContent=`${completed}/${JOURNEY_GOODS.length} مکمل`;return;}
+ const task=JOURNEY_GOODS[taskIndex];
+ const icons={parents:"🤲",charity:"💝",help:"🫱🏻‍🫲🏼",quran:"📖",kindness:"🌿"};
+ const descriptions={parents:"والدین کے ساتھ اچھا برتاؤ کریں یا ان کی خدمت کریں۔",charity:"اپنی استطاعت کے مطابق صدقہ کریں یا کسی کی مدد کریں۔",help:"کسی ایسے شخص کی مدد کریں جسے ضرورت ہو۔",quran:"قرآنِ پاک کی تلاوت کے لیے کچھ وقت نکالیں۔",kindness:"آج اپنی گفتگو اور رویّے میں نرمی اختیار کریں۔"};
+ card.className="taskCard";card.innerHTML=`<div class="taskIcon">${icons[task.id]||"✨"}</div><div class="taskTitle">${task.label}</div><div class="taskDescription">${descriptions[task.id]||"آج اس نیک عمل کو اپنی زندگی کا حصہ بنائیں۔"}</div>`;
+ actions.hidden=false;step.textContent=`${completed+1}/${JOURNEY_GOODS.length}`;
+ $("taskDone").onclick=()=>saveGoodDeed(task.id,true);
+ $("taskLater").onclick=()=>{taskIndex++;renderTaskCard();};
+}
+async function saveGoodDeed(id,done){
+ if(!currentUser||!journeyData)return;
+ const key=safeKey(id);
+ try{await journeyRoot().child("current/goodDeeds/"+key).set(done);journeyData.goodDeeds=journeyData.goodDeeds||{};journeyData.goodDeeds[key]=done;taskIndex++;updateJourneyUI();renderTaskCard();}
+ catch(e){setJourneyMessage("نیک عمل محفوظ نہیں ہو سکا، انٹرنیٹ چیک کریں۔");}
+}
+function syncGoodDeeds(){renderTaskCard();}
+function journeyScore(){
+ if(!journeyData)return 0;
+ const prayers=Object.values(journeyData.prayers||{}).filter(v=>v==="yes").length;
+ const deeds=Object.values(journeyData.goodDeeds||{}).filter(Boolean).length;
+ const azkar=Number(journeyData.azkarReadings||0);
+ // 5 prayers + 5 deeds + up to 10 zikr readings; capped at 100%.
+ return Math.min(100,Math.round((prayers/5*35)+(deeds/5*25)+(Math.min(azkar,10)/10*40)));
+}
+function updateJourneyUI(){
+ if(!journeyData)return;
+ if(!journeyData.startAt||journeyData.ended){$("journeyTimer").textContent=journeyData.ended?"سفر مکمل":"ابھی شروع نہیں ہوا";const pct=journeyScore();$("journeyPercent").textContent=pct+"%";$("journeyProgress").style.width=pct+"%";$("journeyStart").hidden=false;$("journeyStart").textContent=journeyData.ended?"🌅 کل کا نیا سفر شروع کریں":"🌅 اپنا 24 گھنٹے کا سفر شروع کریں";renderTaskCard();return;}
+ $("journeyStart").hidden=true;
+ const start=Number(journeyData.startAt),end=start+86400000,remaining=Math.max(0,end-journeyNow());
+ const h=Math.floor(remaining/3600000),m=Math.floor((remaining%3600000)/60000),sec=Math.floor((remaining%60000)/1000);
+ $("journeyTimer").textContent=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+ const pct=journeyScore();$("journeyPercent").textContent=pct+"%";$("journeyProgress").style.width=pct+"%";
+ updateJourney3D(pct);
+ if(remaining===0){finishJourney();}
+}
+async function ensureJourney(){
+ if(!currentUser){journeyData=null;$("journeyTimer").textContent="لاگ اِن درکار";$("journeyStart").disabled=true;setJourneyMessage("اپنے ذاتی 24 گھنٹے کے سفر اور ریکارڈ کو محفوظ کرنے کے لیے لاگ اِن کریں۔");renderTaskCard();return;}
+ $("journeyStart").disabled=false;
+ const ref=journeyRoot().child("current");
+ const snap=await ref.once("value");let data=snap.val();
+ if(data&&Number(data.startAt)>0&&journeyNow()-Number(data.startAt)>=86400000&&!data.ended){
+   data.ended=true;data.endedAt=Number(data.startAt)+86400000;
+   await ref.set(data);
+   await journeyRoot().child("history/"+String(data.startAt)).set(data);
+ }
+ if(!data){data={started:false,goodDeeds:{},prayers:{},azkarReadings:0};await ref.set(data);}
+ journeyData=data;taskIndex=0;syncGoodDeeds();updateJourneyUI();
+ if(data.ended)setJourneyMessage("آج کا سفر ختم ہوا۔ کل آپ کو پھر 24 گھنٹے ملیں گے۔ اپنی آخرت سنوارنے کے لیے تیار رہیے۔");
+ else if(!data.startAt)setJourneyMessage("جب آپ خود سفر شروع کریں گے، اسی وقت سے 24 گھنٹے شروع ہوں گے۔");
+ else setJourneyMessage("یہ صرف آپ کے درج کردہ اعمال کی پیش رفت ہے، عبادت کی قبولیت یا اجر کا پیمانہ نہیں۔");
+}
+async function startJourney(){
+ if(!currentUser){setJourneyMessage("پہلے اپنے اکاؤنٹ میں لاگ اِن کریں۔");return;}
+ if(journeyData&&journeyData.startAt&&!journeyData.ended)return;
+ if(journeyData&&journeyData.ended&&localDateKey(new Date())<=localDateKey(new Date(Number(journeyData.endedAt||journeyData.startAt+86400000)))){
+   setJourneyMessage("آج کا سفر ختم ہو چکا ہے۔ کل آپ کو پھر 24 گھنٹے ملیں گے۔");return;
+ }
+ const now=journeyNow(),ref=journeyRoot().child("current");
+ const data={started:true,startAt:now,goodDeeds:{},prayers:{},azkarReadings:0};
+ try{
+   await ref.set(data);journeyData=data;taskIndex=0;$("journeyStart").hidden=true;
+   syncGoodDeeds();updateJourneyUI();setJourneyMessage("آپ کا 24 گھنٹے کا سفر شروع ہو گیا ہے۔ اللہ آپ کے لیے آسانی فرمائے۔");
+ }catch(e){setJourneyMessage("سفر شروع نہیں ہو سکا۔ انٹرنیٹ چیک کر کے دوبارہ کوشش کریں۔");}
+}
+async function finishJourney(){
+ if(!currentUser||!journeyData||journeyData.ended||journeyRotating)return;
+ journeyRotating=true;
+ try{
+   journeyData.ended=true;journeyData.endedAt=Number(journeyData.startAt)+86400000;
+   await journeyRoot().child("current").set(journeyData);
+   await journeyRoot().child("history/"+String(journeyData.startAt)).set(journeyData);
+   $("journeyStart").hidden=true;
+   setJourneyMessage("آج کا سفر ختم ہوا۔ کل آپ کو پھر 24 گھنٹے ملیں گے۔ اپنی آخرت سنوارنے کے لیے تیار رہیے۔");
+   renderTaskCard();
+ }catch(e){setJourneyMessage("سفر کا اختتامی ریکارڈ محفوظ نہیں ہو سکا۔");}
+ finally{journeyRotating=false;}
+}
+function recordJourneyZikr(item){
+ if(!currentUser||!journeyData||!journeyData.startAt||journeyData.ended)return;
+ const ref=journeyRoot().child("current");
+ ref.child("azkarReadings").transaction(v=>(Number(v)||0)+1).then(r=>{
+   if(journeyData)journeyData.azkarReadings=Number(r.snapshot.val()||0);
+   updateJourneyUI();
+ }).catch(e=>console.warn("Journey zikr update failed",e));
+}
+function renderPrayerList(){
+ const box=$("prayerList");if(!box)return;
+ if(!prayerTimings){box.innerHTML="";return;}
+ box.innerHTML=PRAYERS.map(([key,label])=>{
+   const time=prayerTimings[key]||"--:--",answer=journeyData&&journeyData.prayers?journeyData.prayers[prayerDateKey+"_"+key]:"";
+   return `<div class="prayerItem ${answer?"answered":""}"><span>${label}</span><small>${time}</small><b>${answer==="yes"?"✓ ادا کی":answer==="no"?"✕ نہیں ادا کی":"—"}</b></div>`;
+ }).join("");
+}
+async function loadPrayerTimes(){
+ const label=$("prayerLocationText");label.textContent="مقام معلوم کیا جا رہا ہے…";
+ if(!navigator.geolocation){label.textContent="اس براؤزر میں مقام کی سہولت دستیاب نہیں۔";return;}
+ navigator.geolocation.getCurrentPosition(async pos=>{
+   try{
+     const lat=pos.coords.latitude,lon=pos.coords.longitude;
+     const date=new Date();prayerDateKey=localDateKey(date);
+     const dateArg=`${String(date.getDate()).padStart(2,"0")}-${String(date.getMonth()+1).padStart(2,"0")}-${date.getFullYear()}`;
+     const res=await fetch(`https://api.aladhan.com/v1/timings/${dateArg}?latitude=${lat}&longitude=${lon}&method=3`);
+     if(!res.ok)throw new Error("Prayer time service unavailable");
+     const json=await res.json();if(!json||json.code!==200)throw new Error("Invalid prayer time response");
+     prayerTimings=json.data.timings;
+     label.textContent="آج کے نماز کے اوقات آپ کے مقام کے مطابق ہیں۔";
+     renderPrayerList();checkPrayerPrompts();
+   }catch(e){label.textContent="نماز کے اوقات حاصل نہیں ہو سکے۔ دوبارہ کوشش کریں۔";console.warn(e);}
+ },()=>{label.textContent="مقام کی اجازت نہیں ملی۔ اوقات کے لیے مقام کی اجازت دیں۔"},{enableHighAccuracy:false,timeout:12000,maximumAge:3600000});
+}
+function checkPrayerPrompts(){
+ if(!currentUser||!journeyData||!journeyData.startAt||journeyData.ended||!prayerTimings)return;
+ const now=new Date(),nowMins=now.getHours()*60+now.getMinutes();
+ for(const [key,label] of PRAYERS){
+   const raw=String(prayerTimings[key]||"").slice(0,5),parts=raw.split(":").map(Number);
+   if(parts.length!==2||!Number.isFinite(parts[0])||!Number.isFinite(parts[1]))continue;
+   const prayerMins=parts[0]*60+parts[1],eventKey=prayerDateKey+"_"+key;
+   if(nowMins>=prayerMins&&!journeyData.prayers?.[eventKey]&&prayerPromptShown!==eventKey){
+     prayerPromptShown=eventKey;
+     const prompt=$("prayerPrompt");prompt.hidden=false;
+     prompt.innerHTML=`<strong>کیا آپ نے ${label} کی نماز ادا کر لی ہے؟</strong><div class="prayerAnswer"><button type="button" data-answer="yes">جی، ادا کر لی</button><button type="button" class="no" data-answer="no">ابھی نہیں</button></div>`;
+     prompt.querySelectorAll("[data-answer]").forEach(btn=>btn.addEventListener("click",()=>savePrayerAnswer(eventKey,btn.dataset.answer,label)));
+     break;
+   }
+ }
+}
+async function savePrayerAnswer(eventKey,answer,label){
+ if(!currentUser||!journeyData||!journeyData.startAt||journeyData.ended)return;
+ try{
+   await journeyRoot().child("current/prayers/"+safeKey(eventKey)).set(answer);
+   journeyData.prayers=journeyData.prayers||{};journeyData.prayers[safeKey(eventKey)]=answer;
+   $("prayerPrompt").hidden=true;prayerPromptShown="";renderPrayerList();updateJourneyUI();
+ }catch(e){setJourneyMessage("نماز کا جواب محفوظ نہیں ہو سکا۔ انٹرنیٹ چیک کریں۔");}
+}
+$("loadPrayerTimes").addEventListener("click",loadPrayerTimes);
+$("journeyStart").addEventListener("click",startJourney);
+renderGoodDeeds();
+db.ref(".info/serverTimeOffset").on("value",s=>{serverOffset=Number(s.val()||0);});
+auth.onAuthStateChanged(user=>{
+ if(user){
+   ensureJourney().then(()=>{renderPrayerList();checkPrayerPrompts();if(!prayerTimings)loadPrayerTimes();}).catch(e=>console.warn("Journey load failed",e));
+ }
+ else{journeyData=null;$("journeyTimer").textContent="لاگ اِن درکار";$("prayerPrompt").hidden=true;$("taskCard").innerHTML="<div class=\"taskIcon\">🔐</div><div class=\"taskTitle\">آپ کا اکاؤنٹ درکار ہے</div><div class=\"taskDescription\">پہلے index.html میں لاگ اِن کریں، پھر یہاں واپس آئیں۔ آپ کا لاگ اِن خود بخود پہچان لیا جائے گا۔</div>";$("taskActions").hidden=true;}
+});
+journeyTimerHandle=setInterval(()=>{if(journeyData&&journeyData.startAt&&!journeyData.ended)updateJourneyUI();checkPrayerPrompts();},1000);
+setInterval(()=>{if(prayerTimings&&prayerDateKey!==localDateKey())loadPrayerTimes();},60000);
+
+initJourney3D();
 loadLocalProgress();
 render();
 loadLeaderboard();
-setTimeout(()=>{ if(!keep && document.visibilityState==="visible") startVoice(); },350);
+// Do not auto-start the microphone; the user chooses when to begin recitation.
 
 </script>
 </body>
